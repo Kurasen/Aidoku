@@ -30,6 +30,10 @@ class DownloadManager {
     private let queue: DownloadQueue
 //    private let store: DownloadStore // TODO: store downloads so if the app exits we can resume
 
+    private(set) var downloadsPaused = false
+
+    var ignoreConnectionType = false
+
     init() {
         self.cache = DownloadCache()
         self.queue = DownloadQueue(cache: cache)
@@ -93,7 +97,7 @@ extension DownloadManager {
 
     func downloadAll(manga: Manga) async {
         let chapters = await CoreDataManager.shared.getChapters(sourceId: manga.sourceId, mangaId: manga.id)
-        download(chapters: chapters, manga: manga)
+        download(chapters: chapters.reversed(), manga: manga)
     }
 
     func downloadUnread(manga: Manga) async {
@@ -101,7 +105,7 @@ extension DownloadManager {
         let chapters = await CoreDataManager.shared.getChapters(sourceId: manga.sourceId, mangaId: manga.id).filter {
             readingHistory[$0.id] == nil || readingHistory[$0.id]?.page != -1
         }
-        download(chapters: chapters, manga: manga)
+        download(chapters: chapters.reversed(), manga: manga)
     }
 
     func download(chapters: [Chapter], manga: Manga? = nil) {
@@ -125,6 +129,22 @@ extension DownloadManager {
         NotificationCenter.default.post(name: NSNotification.Name("downloadsRemoved"), object: manga)
     }
 
+    func pauseDownloads(for chapters: [Chapter] = []) {
+        Task {
+            await queue.pause()
+        }
+        downloadsPaused = true
+        NotificationCenter.default.post(name: Notification.Name("downloadsPaused"), object: nil)
+    }
+
+    func resumeDownloads(for chapters: [Chapter] = []) {
+        Task {
+            await queue.resume()
+        }
+        downloadsPaused = false
+        NotificationCenter.default.post(name: Notification.Name("downloadsResumed"), object: nil)
+    }
+
     func cancelDownload(for chapter: Chapter) {
         Task {
             await queue.cancelDownload(for: chapter)
@@ -139,6 +159,7 @@ extension DownloadManager {
                 await queue.cancelDownloads(for: chapters)
             }
         }
+        downloadsPaused = false
     }
 
     func onProgress(for chapter: Chapter, block: @escaping (Int, Int) -> Void) {

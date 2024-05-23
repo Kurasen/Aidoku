@@ -30,7 +30,7 @@ class MangaViewController: BaseTableViewController {
     init(manga: Manga, chapterList: [Chapter] = [], scrollTo: Chapter? = nil) {
         self.manga = manga
         self.scrollToChapter = scrollTo
-        viewModel.chapterList = chapterList
+        self.viewModel.fullChapterList = chapterList
         super.init()
     }
 
@@ -48,6 +48,14 @@ class MangaViewController: BaseTableViewController {
         if let cachedManga = CoreDataManager.shared.getManga(sourceId: manga.sourceId, mangaId: manga.id) {
             manga = manga.copy(from: cachedManga.toManga())
         }
+
+        // load filters before tableView init
+        let filters = CoreDataManager.shared.getMangaChapterFilters(sourceId: manga.sourceId, mangaId: manga.id)
+        viewModel.sortMethod = .init(flags: filters.flags)
+        viewModel.sortAscending = filters.flags & ChapterFlagMask.sortAscending != 0
+        viewModel.sortMethod = .init(flags: filters.flags)
+        viewModel.filters = ChapterFilterOption.parseOptions(flags: filters.flags)
+        viewModel.langFilter = filters.language
 
         if #available(iOS 15.0, *) {
             tableView.sectionHeaderTopPadding = 0
@@ -105,6 +113,7 @@ class MangaViewController: BaseTableViewController {
 
             await viewModel.loadHistory(manga: manga)
             await viewModel.loadChapterList(manga: manga)
+            viewModel.sortChapters()
             updateDataSource()
             updateReadButton()
 
@@ -151,6 +160,12 @@ class MangaViewController: BaseTableViewController {
 
     // swiftlint:disable:next cyclomatic_complexity
     override func observe() {
+        // reload chapter list (triggered on filtering)
+        addObserver(forName: "reloadChapterList") { [weak self] _ in
+            guard let self = self else { return }
+            self.updateReadButton()
+            self.updateDataSource()
+        }
         // update library status
         addObserver(forName: "addToLibrary") { [weak self] notification in
             guard
@@ -280,9 +295,13 @@ class MangaViewController: BaseTableViewController {
                 chapter = chapterCast
             }
             Task { @MainActor in
-                if let chapter = chapter {
+                if let chapter {
                     self.viewModel.downloadProgress.removeValue(forKey: chapter.id)
                     self.reloadCells(for: [chapter])
+                    if self.viewModel.hasDownloadFilter {
+                        self.viewModel.filterChapterList()
+                        self.updateDataSource()
+                    }
                 }
                 self.updateNavbarButtons()
             }
@@ -295,11 +314,18 @@ class MangaViewController: BaseTableViewController {
                         self.viewModel.downloadProgress.removeValue(forKey: chapter.id)
                     }
                     self.reloadCells(for: chapters)
+                    if self.viewModel.hasDownloadFilter {
+                        self.viewModel.filterChapterList()
+                        self.updateDataSource()
+                    }
                 } else if
                     let manga = notification.object as? Manga,
                     manga.id == self.manga.id && manga.sourceId == self.manga.sourceId
                 { // all chapters
                     self.viewModel.downloadProgress = [:]
+                    if self.viewModel.hasDownloadFilter {
+                        self.viewModel.filterChapterList()
+                    }
                     self.updateDataSource()
                 }
             }
@@ -445,6 +471,10 @@ class MangaViewController: BaseTableViewController {
     }
 
     @objc func refresh(_ refreshControl: UIRefreshControl? = nil) {
+        guard Reachability.getConnectionType() != .none else {
+            refreshControl?.endRefreshing()
+            return
+        }
         Task {
             if let source = SourceManager.shared.source(for: manga.sourceId) {
                 let inLibrary = await CoreDataManager.shared.container.performBackgroundTask { context in
@@ -473,20 +503,21 @@ class MangaViewController: BaseTableViewController {
                     // update chapters
                     group.addTask {
                         let manga = await self.manga
-                        let chapterList = (try? await source.getChapterList(manga: manga)) ?? []
-                        await MainActor.run {
-                            self.viewModel.chapterList = chapterList
-                        }
-                        // update in db
-                        if inLibrary {
-                            await CoreDataManager.shared.container.performBackgroundTask { context in
-                                CoreDataManager.shared.setChapters(
-                                    chapterList,
-                                    sourceId: manga.sourceId,
-                                    mangaId: manga.id,
-                                    context: context
-                                )
-                                try? context.save()
+                        if let chapterList = try? await source.getChapterList(manga: manga) {
+                            await MainActor.run {
+                                self.viewModel.fullChapterList = chapterList
+                            }
+                            // update in db
+                            if inLibrary {
+                                await CoreDataManager.shared.container.performBackgroundTask { context in
+                                    CoreDataManager.shared.setChapters(
+                                        chapterList,
+                                        sourceId: manga.sourceId,
+                                        mangaId: manga.id,
+                                        context: context
+                                    )
+                                    try? context.save()
+                                }
                             }
                         }
                     }
@@ -494,6 +525,7 @@ class MangaViewController: BaseTableViewController {
             }
             headerView.configure(with: manga)
             await viewModel.loadHistory(manga: manga)
+            viewModel.filterChapterList()
             updateDataSource()
             updateReadButton()
             refreshControl?.endRefreshing()
@@ -526,7 +558,17 @@ class MangaViewController: BaseTableViewController {
         } ?? [])
             .filter { !DownloadManager.shared.isChapterDownloaded(chapter: $0) }
             .sorted { $0.sourceOrder > $1.sourceOrder }
-        DownloadManager.shared.download(chapters: chapters, manga: manga)
+
+        if UserDefaults.standard.bool(forKey: "Library.downloadOnlyOnWifi") &&
+            Reachability.getConnectionType() == .wifi ||
+            !UserDefaults.standard.bool(forKey: "Library.downloadOnlyOnWifi") {
+            DownloadManager.shared.download(chapters: chapters, manga: manga)
+        } else {
+            self.presentAlert(
+                title: NSLocalizedString("NO_WIFI_ALERT_TITLE", comment: ""),
+                message: NSLocalizedString("NO_WIFI_ALERT_MESSAGE", comment: "")
+            )
+        }
         setEditing(false, animated: true)
     }
 
@@ -852,9 +894,12 @@ extension MangaViewController {
         else { return nil }
         var config = ChapterListHeaderConfiguration()
         config.delegate = self
+        config.chapterCount = viewModel.chapterList.count
         config.sortOption = viewModel.sortMethod
         config.sortAscending = viewModel.sortAscending
-        config.chapterCount = viewModel.chapterList.count
+        config.filters = viewModel.filters
+        config.langFilter = viewModel.langFilter
+        config.sourceLangs = viewModel.getSourceDefaultLanguages(sourceId: manga.sourceId)
         cell.contentConfiguration = config
         return cell
     }
@@ -894,7 +939,17 @@ extension MangaViewController {
                     title: NSLocalizedString("DOWNLOAD", comment: ""),
                     image: UIImage(systemName: "arrow.down.circle")
                 ) { _ in
-                    DownloadManager.shared.download(chapters: [chapter], manga: self.manga)
+                    if UserDefaults.standard.bool(forKey: "Library.downloadOnlyOnWifi") &&
+                        Reachability.getConnectionType() == .wifi ||
+                        !UserDefaults.standard.bool(forKey: "Library.downloadOnlyOnWifi") {
+                        DownloadManager.shared.download(chapters: [chapter], manga: self.manga)
+                    } else {
+                        self.presentAlert(
+                            title: NSLocalizedString("NO_WIFI_ALERT_TITLE", comment: ""),
+                            message: NSLocalizedString("NO_WIFI_ALERT_MESSAGE", comment: "")
+                        )
+                    }
+
                     self.reloadCells(for: [chapter])
                 }
             }
@@ -1130,6 +1185,19 @@ extension MangaViewController: MangaDetailHeaderViewDelegate {
         present(SFSafariViewController(url: url), animated: true)
     }
 
+    // copy manga link when holding down the web view button
+    func safariHeld() {
+        guard let url = manga.url else { return }
+        UIPasteboard.general.string = url.absoluteString
+        let alert = UIAlertController(
+            title: NSLocalizedString("LINK_COPIED", comment: ""),
+            message: NSLocalizedString("LINK_COPIED_TEXT", comment: ""),
+            preferredStyle: .alert
+        )
+        alert.addAction(UIAlertAction(title: NSLocalizedString("OK", comment: ""), style: .cancel))
+        present(alert, animated: true)
+    }
+
     // open reader to next chapter
     func readPressed() {
         guard let chapter = headerView.nextChapter else { return }
@@ -1138,11 +1206,9 @@ extension MangaViewController: MangaDetailHeaderViewDelegate {
 
     // open full manga cover view
     func coverPressed() {
-        if let coverUrl = manga.coverUrl {
-            let navigationController = UINavigationController(rootViewController: MangaCoverViewController(coverUrl: coverUrl))
-            navigationController.modalPresentationStyle = .fullScreen
-            present(navigationController, animated: true)
-        }
+        let navigationController = UINavigationController(rootViewController: MangaCoverViewController(manga: manga))
+        navigationController.modalPresentationStyle = .fullScreen
+        present(navigationController, animated: true)
     }
 }
 
@@ -1153,12 +1219,36 @@ extension MangaViewController: ChapterSortDelegate {
         viewModel.sortChapters(method: newOption)
         refreshDataSource()
         updateReadButton()
+        Task {
+            await viewModel.saveFilters(manga: manga)
+        }
     }
 
     func sortAscendingChanged(_ newValue: Bool) {
         viewModel.sortChapters(ascending: newValue)
         refreshDataSource()
         updateReadButton()
+        Task {
+            await viewModel.saveFilters(manga: manga)
+        }
+    }
+
+    func filtersChanged(_ newFilters: [ChapterFilterOption]) {
+        Task {
+            viewModel.filters = newFilters
+            await viewModel.loadChapterList(manga: manga)
+            refreshDataSource()
+            updateReadButton()
+            await viewModel.saveFilters(manga: manga)
+        }
+    }
+
+    func langFilterChanged(_ newValue: String?) {
+        Task {
+            await viewModel.languageFilterChanged(newValue, manga: manga)
+            refreshDataSource()
+            updateReadButton()
+        }
     }
 }
 

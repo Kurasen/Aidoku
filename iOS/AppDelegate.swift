@@ -12,6 +12,7 @@ import Nuke
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
     static let isSideloaded = Bundle.main.bundleIdentifier != "xyz.skitty.Aidoku"
+    private var networkObserverId: UUID?
 
     private lazy var loadingAlert: UIAlertController = {
         let loadingAlert = UIAlertController(title: nil, message: NSLocalizedString("LOADING_ELLIPSIS", comment: ""), preferredStyle: .alert)
@@ -49,6 +50,17 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         ((UIApplication.shared.windows.first?.rootViewController as? UITabBarController)?
             .selectedViewController as? UINavigationController)?
             .visibleViewController
+    }
+
+    var topViewController: UIViewController? {
+        if var topController = UIApplication.shared.windows.first?.rootViewController {
+            while let presentedViewController = topController.presentedViewController {
+                topController = presentedViewController
+            }
+            return topController
+        } else {
+            return nil
+        }
     }
 
     func application(
@@ -100,6 +112,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 "Reader.downsampleImages": true,
                 "Reader.cropBorders": false,
                 "Reader.saveImageOption": true,
+                "Reader.backgroundColor": "black",
                 "Reader.pagesToPreload": 2,
                 "Reader.pagedPageLayout": "auto",
                 "Reader.verticalInfiniteScroll": true,
@@ -139,6 +152,20 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
         UserDefaults.standard.set(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String, forKey: "currentVersion")
 
+        networkObserverId = Reachability.registerConnectionTypeObserver { connectionType in
+            switch connectionType {
+            case .wifi:
+                if UserDefaults.standard.bool(forKey: "Library.downloadOnlyOnWifi") {
+                    DownloadManager.shared.ignoreConnectionType = false
+                    DownloadManager.shared.resumeDownloads()
+                }
+            case .cellular, .none:
+                if UserDefaults.standard.bool(forKey: "Library.downloadOnlyOnWifi") && !DownloadManager.shared.ignoreConnectionType {
+                    DownloadManager.shared.pauseDownloads()
+                }
+            }
+        }
+
         return true
     }
 
@@ -153,6 +180,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication, open url: URL, sourceApplication: String?, annotation: Any) -> Bool {
         handleUrl(url: url)
         return true
+    }
+
+    func applicationWillTerminate(_ application: UIApplication) {
+        guard let networkObserverId else { return }
+        Reachability.unregisterConnectionTypeObserver(networkObserverId)
     }
 
     func migrateHistory() async {
@@ -313,6 +345,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func sendAlert(title: String, message: String) {
         let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: NSLocalizedString("OK", comment: ""), style: .cancel))
-        UIApplication.shared.windows.first?.rootViewController?.present(alert, animated: true)
+        topViewController?.present(alert, animated: true)
     }
 }
