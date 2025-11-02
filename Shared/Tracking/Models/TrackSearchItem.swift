@@ -8,11 +8,9 @@
 import Foundation
 
 /// A structure containing the necessary data to be returned from a tracker search.
-struct TrackSearchItem {
+struct TrackSearchItem: Equatable {
     /// A unique identifier of the tracker item.
     let id: String
-    /// The identifier for the item's tracker.
-    let trackerId: String
     /// The title of the tracker item.
     var title: String?
     /// The URL for the cover image of the tracker item.
@@ -25,15 +23,4 @@ struct TrackSearchItem {
     var type: MediaType?
     /// A boolean indicating if the item is currently being tracked by the user.
     var tracked: Bool
-
-    /// Converts the search item to a TrackItem for the given manga.
-    func toItem(for manga: Manga) -> TrackItem {
-        TrackItem(
-            id: id,
-            trackerId: trackerId,
-            sourceId: manga.sourceId,
-            mangaId: manga.id,
-            title: title
-        )
-    }
 }

@@ -7,8 +7,8 @@
 
 import Foundation
 
-enum DownloadStatus {
-    case none
+enum DownloadStatus: Int, Codable {
+    case none = 0
     case queued
     case downloading
     case paused
@@ -17,8 +17,7 @@ enum DownloadStatus {
     case failed
 }
 
-struct Download: Equatable {
-
+struct Download: Equatable, Codable {
     let sourceId: String
     let mangaId: String
     let chapterId: String
@@ -36,14 +35,37 @@ struct Download: Equatable {
     }
 
     static func from(chapter: Chapter, status: DownloadStatus = .queued) -> Download {
-        Download(sourceId: chapter.sourceId, mangaId: chapter.mangaId, chapterId: chapter.id, status: status, chapter: chapter)
+        Download(
+            sourceId: chapter.sourceId,
+            mangaId: chapter.mangaId,
+            chapterId: chapter.id,
+            status: status,
+            chapter: chapter
+        )
     }
 
     func toChapter() -> Chapter {
-        if let chapter = chapter {
+        if let chapter {
             return chapter
         } else {
-            return Chapter(sourceId: sourceId, id: chapterId, mangaId: mangaId, title: nil, sourceOrder: -1)
+            return Chapter(
+                sourceId: sourceId,
+                id: chapterId,
+                mangaId: mangaId,
+                title: nil,
+                sourceOrder: -1
+            )
+        }
+    }
+
+    func toManga() -> Manga {
+        if let manga {
+            return manga
+        } else {
+            return Manga(
+                sourceId: sourceId,
+                id: mangaId
+            )
         }
     }
 }

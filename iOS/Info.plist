@@ -11,7 +11,7 @@
 			<string>Owner</string>
 			<key>LSItemContentTypes</key>
 			<array>
-				<string>xyz.skitty.Aidoku.aix</string>
+				<string>app.aidoku.Aidoku.aix</string>
 			</array>
 		</dict>
 		<dict>
@@ -21,7 +21,7 @@
 			<string>Owner</string>
 			<key>LSItemContentTypes</key>
 			<array>
-				<string>xyz.skitty.Aidoku.aib</string>
+				<string>app.aidoku.Aidoku.aib</string>
 			</array>
 		</dict>
 		<dict>
@@ -32,6 +32,26 @@
 			<key>LSItemContentTypes</key>
 			<array>
 				<string>public.json</string>
+			</array>
+		</dict>
+		<dict>
+			<key>CFBundleTypeName</key>
+			<string>Comic Book Archive (Zip)</string>
+			<key>LSHandlerRank</key>
+			<string>Default</string>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>vnd.comicbook-zip</string>
+			</array>
+		</dict>
+		<dict>
+			<key>CFBundleTypeName</key>
+			<string>Comic Book Archive (RAR)</string>
+			<key>LSHandlerRank</key>
+			<string>Default</string>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>vnd.comicbook-rar</string>
 			</array>
 		</dict>
 	</array>
@@ -46,8 +66,8 @@
 			</array>
 		</dict>
 	</array>
-	<key>ITSAppUsesNonExemptEncryption</key>
-	<false/>
+	<key>ICLOUD_CONTAINER_ID</key>
+	<string>$(ICLOUD_CONTAINER_ID)</string>
 	<key>NSAppTransportSecurity</key>
 	<dict>
 		<key>NSAllowsArbitraryLoads</key>
@@ -88,7 +108,7 @@
 			<key>UTTypeIconFiles</key>
 			<array/>
 			<key>UTTypeIdentifier</key>
-			<string>xyz.skitty.Aidoku.aix</string>
+			<string>app.aidoku.Aidoku.aix</string>
 			<key>UTTypeTagSpecification</key>
 			<dict>
 				<key>public.filename-extension</key>
@@ -108,13 +128,55 @@
 			<key>UTTypeIconFiles</key>
 			<array/>
 			<key>UTTypeIdentifier</key>
-			<string>xyz.skitty.Aidoku.aib</string>
+			<string>app.aidoku.Aidoku.aib</string>
 			<key>UTTypeTagSpecification</key>
 			<dict>
 				<key>public.filename-extension</key>
 				<array>
 					<string>aib</string>
 				</array>
+			</dict>
+		</dict>
+		<dict>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.zip-archive</string>
+			</array>
+			<key>UTTypeDescription</key>
+			<string>Comic Book Zip Archive</string>
+			<key>UTTypeIconFiles</key>
+			<array/>
+			<key>UTTypeIdentifier</key>
+			<string>vnd.comicbook-zip</string>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>cbz</string>
+				</array>
+				<key>public.mime-type</key>
+				<array/>
+			</dict>
+		</dict>
+		<dict>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.archive</string>
+			</array>
+			<key>UTTypeDescription</key>
+			<string>Comic Book Rar Archive</string>
+			<key>UTTypeIconFiles</key>
+			<array/>
+			<key>UTTypeIdentifier</key>
+			<string>vnd.comicbook-rar</string>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>cbr</string>
+				</array>
+				<key>public.mime-type</key>
+				<array/>
 			</dict>
 		</dict>
 	</array>

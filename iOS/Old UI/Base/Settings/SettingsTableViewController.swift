@@ -33,6 +33,7 @@ class SettingsTableViewController: UITableViewController {
 
     init(items: [SettingItem] = [], source: Source? = nil, style: UITableView.Style = .insetGrouped) {
         self.items = items
+        self.source = source
         super.init(style: style)
     }
 
@@ -97,21 +98,6 @@ extension SettingsTableViewController {
                         }
                     }
                 }
-            } else if item.authToEnable ?? false && isOn {
-                let context = LAContext()
-                if context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: nil) {
-                    context.evaluatePolicy(
-                        .deviceOwnerAuthenticationWithBiometrics,
-                        localizedReason: NSLocalizedString("AUTH_TO_ENABLE", comment: "")
-                    ) { success, _ in
-                        if !success {
-                            Task { @MainActor in
-                                switchView.setOn(false, animated: true)
-                                switchView.sendActions(for: .valueChanged)
-                            }
-                        }
-                    }
-                }
             }
             if let notification = item.notification {
                 self.source?.performAction(key: notification)
@@ -121,13 +107,17 @@ extension SettingsTableViewController {
         if let requires = item.requires {
             switchView.isEnabled = UserDefaults.standard.bool(forKey: requires)
             observers.append(NotificationCenter.default.addObserver(forName: NSNotification.Name(requires), object: nil, queue: nil) { _ in
-                switchView.isEnabled = UserDefaults.standard.bool(forKey: requires)
+                Task { @MainActor in
+                    switchView.isEnabled = UserDefaults.standard.bool(forKey: requires)
+                }
             })
             requireObservers.append(item)
         } else if let requires = item.requiresFalse {
             switchView.isEnabled = !UserDefaults.standard.bool(forKey: requires)
             observers.append(NotificationCenter.default.addObserver(forName: NSNotification.Name(requires), object: nil, queue: nil) { _ in
-                switchView.isEnabled = !UserDefaults.standard.bool(forKey: requires)
+                Task { @MainActor in
+                    switchView.isEnabled = !UserDefaults.standard.bool(forKey: requires)
+                }
             })
             requireObservers.append(item)
         } else {
@@ -141,11 +131,12 @@ extension SettingsTableViewController {
 
     // MARK: Stepper Cell
     func stepperCell(for item: SettingItem) -> UITableViewCell {
-        let cell = UITableViewCell(style: .value1, reuseIdentifier: "UITableViewCell.Value1")
+        let cell = StepperTableViewCell(style: .default, reuseIdentifier: "StepperCell")
 
-        cell.detailTextLabel?.text = String(UserDefaults.standard.integer(forKey: item.key ?? ""))
-        cell.detailTextLabel?.textColor = .secondaryLabel
-        let stepperView = UIStepper()
+        cell.titleLabel.text = item.title
+        cell.detailLabel.text = String(UserDefaults.standard.integer(forKey: item.key ?? ""))
+
+        let stepperView = cell.stepperView
         if let max = item.maximumValue {
             stepperView.maximumValue = max
         }
@@ -155,7 +146,7 @@ extension SettingsTableViewController {
         stepperView.stepValue = item.stepValue ?? 1
         stepperView.defaultsKey = item.key ?? ""
         stepperView.handleChange { _ in
-            cell.detailTextLabel?.text = String(UserDefaults.standard.integer(forKey: item.key ?? ""))
+            cell.detailLabel.text = String(UserDefaults.standard.integer(forKey: item.key ?? ""))
             if let notification = item.notification {
                 self.source?.performAction(key: notification)
                 NotificationCenter.default.post(name: NSNotification.Name(notification), object: item)
@@ -164,25 +155,26 @@ extension SettingsTableViewController {
         if let requires = item.requires {
             stepperView.isEnabled = UserDefaults.standard.bool(forKey: requires)
             NotificationCenter.default.addObserver(forName: NSNotification.Name(requires), object: nil, queue: nil) { _ in
-                stepperView.isEnabled = UserDefaults.standard.bool(forKey: requires)
+                Task { @MainActor in
+                    stepperView.isEnabled = UserDefaults.standard.bool(forKey: requires)
+                }
             }
             requireObservers.append(item)
         } else if let requires = item.requiresFalse {
             stepperView.isEnabled = !UserDefaults.standard.bool(forKey: requires)
             NotificationCenter.default.addObserver(forName: NSNotification.Name(requires), object: nil, queue: nil) { _ in
-                stepperView.isEnabled = !UserDefaults.standard.bool(forKey: requires)
+                Task { @MainActor in
+                    stepperView.isEnabled = !UserDefaults.standard.bool(forKey: requires)
+                }
             }
             requireObservers.append(item)
         } else {
             stepperView.isEnabled = true
         }
-        cell.accessoryView = stepperView
-        cell.selectionStyle = .none
 
         return cell
     }
 
-    // swiftlint:disable:next cyclomatic_complexity
     func tableView(
         _ tableView: UITableView,
         cellForRowAt indexPath: IndexPath,
@@ -212,16 +204,20 @@ extension SettingsTableViewController {
                 cell.textLabel?.textColor = UserDefaults.standard.bool(forKey: requires) ? .label : .secondaryLabel
                 cell.selectionStyle = UserDefaults.standard.bool(forKey: requires) ? .default : .none
                 observers.append(NotificationCenter.default.addObserver(forName: NSNotification.Name(requires), object: nil, queue: nil) { _ in
-                    cell.textLabel?.textColor = UserDefaults.standard.bool(forKey: requires) ? .label : .secondaryLabel
-                    cell.selectionStyle = UserDefaults.standard.bool(forKey: requires) ? .default : .none
+                    Task { @MainActor in
+                        cell.textLabel?.textColor = UserDefaults.standard.bool(forKey: requires) ? .label : .secondaryLabel
+                        cell.selectionStyle = UserDefaults.standard.bool(forKey: requires) ? .default : .none
+                    }
                 })
                 requireObservers.append(item)
             } else if let requires = item.requiresFalse {
                 cell.textLabel?.textColor = !UserDefaults.standard.bool(forKey: requires) ? .label : .secondaryLabel
                 cell.selectionStyle = !UserDefaults.standard.bool(forKey: requires) ? .default : .none
                 observers.append(NotificationCenter.default.addObserver(forName: NSNotification.Name(requires), object: nil, queue: nil) { _ in
-                    cell.textLabel?.textColor = !UserDefaults.standard.bool(forKey: requires) ? .label : .secondaryLabel
-                    cell.selectionStyle = !UserDefaults.standard.bool(forKey: requires) ? .default : .none
+                    Task { @MainActor in
+                        cell.textLabel?.textColor = !UserDefaults.standard.bool(forKey: requires) ? .label : .secondaryLabel
+                        cell.selectionStyle = !UserDefaults.standard.bool(forKey: requires) ? .default : .none
+                    }
                 })
                 requireObservers.append(item)
             } else {
@@ -250,16 +246,20 @@ extension SettingsTableViewController {
                 cell.textLabel?.textColor = UserDefaults.standard.bool(forKey: requires) ? .label : .secondaryLabel
                 cell.selectionStyle = UserDefaults.standard.bool(forKey: requires) ? .default : .none
                 observers.append(NotificationCenter.default.addObserver(forName: NSNotification.Name(requires), object: nil, queue: nil) { _ in
-                    cell.textLabel?.textColor = UserDefaults.standard.bool(forKey: requires) ? .label : .secondaryLabel
-                    cell.selectionStyle = UserDefaults.standard.bool(forKey: requires) ? .default : .none
+                    Task { @MainActor in
+                        cell.textLabel?.textColor = UserDefaults.standard.bool(forKey: requires) ? .label : .secondaryLabel
+                        cell.selectionStyle = UserDefaults.standard.bool(forKey: requires) ? .default : .none
+                    }
                 })
                 requireObservers.append(item)
             } else if let requires = item.requiresFalse {
                 cell.textLabel?.textColor = !UserDefaults.standard.bool(forKey: requires) ? .label : .secondaryLabel
                 cell.selectionStyle = !UserDefaults.standard.bool(forKey: requires) ? .default : .none
                 observers.append(NotificationCenter.default.addObserver(forName: NSNotification.Name(requires), object: nil, queue: nil) { _ in
-                    cell.textLabel?.textColor = !UserDefaults.standard.bool(forKey: requires) ? .label : .secondaryLabel
-                    cell.selectionStyle = !UserDefaults.standard.bool(forKey: requires) ? .default : .none
+                    Task { @MainActor in
+                        cell.textLabel?.textColor = !UserDefaults.standard.bool(forKey: requires) ? .label : .secondaryLabel
+                        cell.selectionStyle = !UserDefaults.standard.bool(forKey: requires) ? .default : .none
+                    }
                 })
                 requireObservers.append(item)
             } else {
@@ -314,7 +314,6 @@ extension SettingsTableViewController {
         }
     }
 
-    // swiftlint:disable:next cyclomatic_complexity
     func performAction(for item: SettingItem, at indexPath: IndexPath) {
         switch item.type {
         case "select", "multi-select", "multi-single-select":
@@ -345,7 +344,10 @@ extension SettingsTableViewController {
                 )
             }
         case "link":
-            guard let url = URL(string: item.url ?? item.key ?? "") else { return }
+            guard
+                let url = URL(string: item.url ?? item.key ?? ""),
+                url.scheme == "http" || url.scheme == "https"
+            else { return }
             if let notification = item.notification {
                 self.source?.performAction(key: notification)
                 NotificationCenter.default.post(name: NSNotification.Name(notification), object: nil)
@@ -361,7 +363,7 @@ extension SettingsTableViewController {
             source?.performAction(key: action)
             NotificationCenter.default.post(name: NSNotification.Name(action), object: nil)
         case "login":
-            guard item.method == "oauth", let key = item.key else { return } // TODO: support more than OAuth
+            guard item.method == "oauth", let key = item.key else { return }
             let url: URL?
             if item.urlKey != nil, let urlString = UserDefaults.standard.string(forKey: item.urlKey ?? "") {
                 url = URL(string: urlString)

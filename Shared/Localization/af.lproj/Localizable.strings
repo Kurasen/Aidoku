@@ -83,9 +83,6 @@
 "APPEARANCE_LIGHT" = "Lig";
 "APPEARANCE_DARK" = "Donker";
 "USE_SYSTEM_APPEARANCE" = "Gebruik Stelselvoorkoms";
-"MANGA_PAGE" = "Manga Bladsy";
-"SHOW_SOURCE_LABEL" = "Wys Bronetiket";
-"USE_MANGA_TINT" = "Gebruik Manga Tint";
 "MANGA_PER_ROW" = "Manga per ry";
 "ONLY_UPDATE_ON_WIFI" = "Dateer Slegs op Wi-Fi op";
 "EXCLUDED_CATEGORIES" = "Uitgeslote Kategorieë";
@@ -100,7 +97,6 @@
 "THAT_HAVENT_BEEN_READ" = "Wat nie gelees is nie";
 "SOURCE_LISTS" = "Bronnelyste";
 "SOURCE_LIST_ADDED" = "Bronnelys Bygevoeg";
-"SHOW_NSFW_SOURCES" = "Wys NSFW-bronne";
 "BACKUP_IMPORT_FAIL_TEXT" = "Kon nie rugsteun stoor nie. Verseker asseblief dat jou rugsteun in die regte formaat is.";
 "EXPORT" = "Voer Uit";
 "RESTORE" = "Herstel";
@@ -111,7 +107,6 @@
 "DISPLAY_LOGS" = "Wys Logs";
 "ADVANCED" = "Gevorderd";
 "RESET_TEXT" = "Hierdie aksie is onomkeerbaar. Alle data, instellings en kas sal uitgevee en teruggestel word.";
-"CLEAR_CHAPTER_CACHE" = "Vee Hoofstukkas Uit";
 // General
 "CONTINUE" = "Gaan voort";
 "REMOVE_DOWNLOADS_CONFIRM" = "Verwyder alle selekteerde aflaaisels?";
@@ -187,7 +182,6 @@
 "ABOUT" = "Meer Oor";
 "DISCORD_SERVER" = "Discord-Bediener";
 "GENERAL" = "Algemeen";
-"USE_MANGA_TINT_INFO" = "Tint manga bladsye gebaseer op die kleur van die voorbladprent";
 "READER" = "Leser";
 "PIN_MANGA_UPDATED" = "Opgedateer";
 "LIBRARY_UPDATING" = "Biblioteekopdatering";
@@ -211,7 +205,6 @@
 "RENAME_BACKUP_TEXT" = "Tik 'n nuwe naam vir jou rugsteun in";
 "SOURCE_LIST_ADD_FAIL" = "Kon Bronnelys Nie Byvoeg Nie";
 "DOWNSAMPLE_IMAGES" = "Verlaag Prente Kwaliteit";
-"SAVE_IMAGE_OPTION" = "Stoor Prent Opsie";
 "BACKUPS" = "Rugsteune";
 "CORRUPTED_BACKUP" = "Korrupte Rugsteun";
 "CORRUPTED_BACKUP_TEXT" = "Hierdie rugsteun se data is verkeerd gekonfigureer. Om te Hernoem is nie moontlik nie.";
@@ -220,6 +213,6 @@
 "RESTORE_BACKUP_TEXT" = "Alle huidige data sal verwyder en vervang word deur die data van hierdie rugsteun.";
 "MISSING_SOURCES_TEXT" = "Die herstelde rugsteun kan data van die volgende bronne bevat, wat nie tans geïnstalleer is nie:";
 "RESTORE_BACKUP" = "Herstel na hierdie rugsteun?";
-"BACKUP_IMPORT_FAIL" = "Invoer Misluk";
+"IMPORT_FAIL" = "Invoer Misluk";
 "BACKUP_IMPORT_SUCCESS" = "Rugsteun Ingevoer";
 "BACKUP_IMPORT_SUCCESS_TEXT" = "Om na hierdie rugsteun te herstel, vind dit in die rugsteunbladsy in instellings.";

@@ -23,12 +23,12 @@
 // Library
 "LIBRARY" = "Bibliotheek";
 "LIBRARY_SEARCH" = "Vind in bibliotheek";
-"LIBRARY_EMPTY" = "Bibliotheek leeg";
-"LIBRARY_ADD_FROM_BROWSE" = "Voeg manga toe vanuit het blader tabblad";
+"LIBRARY_EMPTY" = "Bibliotheek Leeg";
+"LIBRARY_ADD_FROM_BROWSE" = "Voeg manga toe vanuit het ontdekken tabblad";
 "ADD_TO_LIBRARY" = "Voeg toe aan bibliotheek";
 "REMOVE_FROM_LIBRARY" = "Verwijder van bibliotheek";
-"MANGA_INFO" = "Manga info";
-"SORT_BY" = "Sorteer op";
+"MANGA_INFO" = "Manga Informatie";
+"SORT_BY" = "Sorteren op";
 "FILTER_BY" = "Filter op";
 "TITLE" = "Titel";
 "LATEST_CHAPTER" = "Nieuwste hoofdstuk";
@@ -49,7 +49,7 @@
 "UPDATES" = "Updates";
 "INSTALLED" = "Geïnstalleerd";
 "BUTTON_ERROR" = "FOUT";
-"PIN" = "Pin";
+"PIN" = "Vastzetten";
 "UNPIN" = "Losmaken";
 "REORDER" = "Opnieuw ordenen";
 "LANGUAGE" = "Taal";
@@ -58,13 +58,13 @@
 "BUTTON_UPDATE" = "UPDATE";
 
 // Manga
-"UNTITLED" = "Ongetiteld";
+"UNTITLED" = "Zonder titel";
 "ONGOING" = "Voortdurende";
 "CANCELLED" = "Geannuleerd";
 "COMPLETED" = "Voltooid";
 "HIATUS" = "Pauze";
 "SUGGESTIVE" = "Suggestief";
-"BUILD" = "Construct";
+"BUILD" = "Bouw";
 "MISSING_SOURCE" = "Ontbrekende bron";
 "MISSING_SOURCE_TEXT" = "De originele bron lijkt te ontbreken voor deze Manga. Download deze opnieuw of verwijder deze titel van jouw bibliotheek.";
 "SELECT_CHAPTERS" = "Kies hoofdstukken";
@@ -128,10 +128,6 @@
 "INCOGNITO_MODE" = "Incognito modus";
 "APPEARANCE" = "Uiterlijk";
 "USE_SYSTEM_APPEARANCE" = "Gebruik systeem weergave";
-"MANGA_PAGE" = "Manga pagina";
-"SHOW_SOURCE_LABEL" = "Bronlabel tonen";
-"USE_MANGA_TINT" = "Gebruik Manga tint";
-"USE_MANGA_TINT_INFO" = "Tint manga pagina op basis van omslag afbeelding";
 "MANGA_PER_ROW" = "Manga per rij";
 "PORTRAIT" = "Portret";
 "LANDSCAPE" = "Landschap";
@@ -152,12 +148,11 @@
 "SOURCE_LISTS" = "Bron lijsten";
 "SOURCE_LIST_ADDED" = "Bron lijsten toegevoegd";
 "SOURCE_LIST_ADDED_TEXT" = "U kunt nu bladeren door externe bronnen in het Blader tabblad.";
-"SHOW_NSFW_SOURCES" = "Toon NSFW Bronnen";
 "SOURCE_LIST_URL" = "Bron lijst URL";
 "RESTORE_BACKUP" = "Herstellen naar deze back-up?";
 "BACKUP_IMPORT_SUCCESS" = "Back-up geïmporteerd";
 "BACKUP_IMPORT_SUCCESS_TEXT" = "Als u deze back-up wilt herstellen, vindt u deze op de back-up pagina in de instellingen.";
-"BACKUP_IMPORT_FAIL" = "Importeren mislukt";
+"IMPORT_FAIL" = "Importeren mislukt";
 "EXPORT" = "Exporteren";
 "RESTORE" = "Herstellen";
 "LOGS" = "Logboeken";
@@ -167,8 +162,6 @@
 "DISPLAY_LOGS" = "Weergeef logs";
 "ADVANCED" = "Geavanceerd";
 "RESET_TEXT" = "Deze actie is onomkeerbaar. Alle gegevens, instellingen en caches worden gewist en opnieuw ingesteld.";
-"CLEAR_CHAPTER_CACHE" = "Wis hoofdstuk cache";
-"CLEAR_CHAPTER_CACHE_TEXT" = "Deze actie is onomkeerbaar. Gecachte hoofdstukken worden gewist en opnieuw gedownload.";
 "CLEAR_READ_HISTORY_TEXT" = "Deze actie is onomkeerbaar. Alle leesgeschiedenis wordt verwijderd.";
 "RESET_SETTINGS" = "Reset instellingen";
 "RESET_SETTINGS_TEXT" = "Deze actie is onomkeerbaar. Alle app en bron instellingen worden gereset.";
@@ -194,12 +187,12 @@
 "STATUS" = "Status";
 "VOLUMES" = "Boekdeel";
 "STARTED" = "Begonnen";
-"REREADING" = "Herlezen";
+"TRACK_REREADING" = "Herlezen";
 "START_TRACKING" = "Begin met volgen";
 "SCORE" = "Score";
-"PAUSED" = "Gepauzeerd";
-"READING" = "Lezen";
-"PLANNING" = "Planning";
+"TRACK_PAUSED" = "Gepauzeerd";
+"TRACK_READING" = "Lezen";
+"TRACK_PLANNING" = "Planning";
 "NOT_PUBLISHED" = "Niet gepubliceerd";
 "MANHWA" = "Manhwa";
 "VIEW_ON_WEBSITE" = "Zie op website";
@@ -221,8 +214,6 @@
 "RENAME_CATEGORY" = "Hernoem categorie";
 "RENAME_CATEGORY_FAIL_INFO" = "Categorie namen moeten uniek zijn.";
 "CATEGORY_NAME" = "Categorie naam";
-"SYNC_WITH_TRACKER" = "Synchroniseer met Tracker";
-"SYNC_WITH_TRACKER_INFO" = "Het lijkt erop dat het laatste hoofdstuk dat in de tracker (%g) is ingesteld hoger is dan het laatst gelezen hoofdstuk. Wilt u uw lokale geschiedenis hierop aanpassen?";
 "MIGRATE_SOURCES" = "Migreer Bronnen";
 "START_MATCHING" = "Begin met matchen";
 "SYNC_LOCAL_HISTORY" = "Synchroniseer lokale geschiedenis";
@@ -238,15 +229,11 @@
 "FIRST_ALTERNATIVE" = "Eerste alternatief";
 "MIGRATE_ONE_ITEM?" = "Migreer 1 deel?";
 "UPLOAD_DATE" = "Upload datum";
-"TRACKING" = "Tracking";
+"IS_TRACKING" = "Tracking";
 "ALL_CHAPTERS_READ" = "Alle hoofdstukken gelezen";
 "MIGRATE_%i_ITEMS?" = "%i items migreren?";
 "DEFAULT_READING_MODE" = "Standaard leesmodus";
 "BOTH" = "Beide";
-"ANILIST_LOGIN_NEEDED" = "AniList Login nodig";
-"ANILIST_LOGIN_NEEDED_TEXT" = "Uw AniList-token is verlopen, dus de AniList-tracker werkt niet meer totdat u opnieuw inlogt in de instellingen.";
-"MAL_LOGIN_NEEDED" = "MyAnimeList Login nodig";
-"MAL_LOGIN_NEEDED_TEXT" = "Uw MyAnimeList token is verlopen, dus de MyAnimeList-tracker werkt niet meer totdat u zich opnieuw aanmeldt bij de instellingen.";
 "BACKUP_ERROR" = "Back-up herstel fout";
 // General
 "CONTINUE" = "Doorgaan";
@@ -262,7 +249,7 @@
 "BROWSE" = "Blader";
 "BROWSE_NO_SOURCES" = "Geen bronnen";
 "EXTERNAL" = "Extern";
-"BUTTON_GET" = "KRIJGEN";
+"BUTTON_GET" = "ONTVANG";
 "UNINSTALL" = "Deïnstalleren";
 
 // Source
@@ -296,7 +283,6 @@
 "LOCK_HISTORY_TAB" = "Tabblad Geschiedenis vergrendelen";
 "DOWNSAMPLE_IMAGES" = "Afbeeldingen verkleinen";
 "CROP_BORDERS" = "Rand bijsnijden";
-"SAVE_IMAGE_OPTION" = "Afbeelding opslaan optie";
 "BACKUPS" = "Backups";
 "BACKUP_NAME" = "Back-up naam";
 "RENAME_BACKUP" = "Hernoem Back-up";
@@ -317,14 +303,12 @@
 "RENAME_CATEGORY_FAIL" = "Kan de naam van de categorie niet wijzigen";
 "PIN_MANGA" = "Manga vastzetten";
 "ONLY_UPDATE_ON_WIFI" = "Alleen over Wifi updaten";
-"CLEAR_MANGA_CACHE" = "Manga-cache leegmaken";
-"CLEAR_MANGA_CACHE_TEXT" = "Deze actie is onomkeerbaar. Gecachte manga die niet in je bibliotheek staat, wordt verwijderd.";
 "CLEAR_NETWORK_CACHE" = "Netwerk-cache legen";
 "CLEAR_NETWORK_CACHE_TEXT" = "Deze actie is onomkeerbaar. Netwerkverzoeken en afbeeldingen in de cache worden verwijderd.";
 "CLEAR_READ_HISTORY" = "Leesgeschiedenis legen";
 "PAGED" = "Pagina genummerd";
 "TRACKERS" = "Trackers";
-"DROPPED" = "Geannuleerd";
+"TRACK_DROPPED" = "Geannuleerd";
 "STOP_TRACKING" = "Tracking stoppen";
 "ONESHOT" = "Eenmalig";
 "MANHUA" = "Manhua";
@@ -360,3 +344,45 @@
 "READER_BG_COLOR_BLACK" = "Zwart";
 "PAUSE" = "Pauzeren";
 "RESUME" = "Hervatten";
+"DELETE_DOWNLOAD_AFTER_READING" = "Verwijder download na lezen";
+"SKIPPING_CHAPTERS" = "%i Hoofdstukken worden overgeslagen, omdat de bron deze mist, of omdat deze eruit gefilterd worden";
+"SCANLATOR" = "Scanlator";
+"NO_SCANLATOR" = "Geen scanlator";
+"REMOVING_%i_ITEMS_FROM_CATEGORY_%@" = "%i Boeken uit Categorie %A verwijderen";
+"ENABLE_PERMISSION" = "Geef Toestemming";
+"PHOTOS_ACCESS_DENIED_TEXT" = "Toegang was eerder geweigerd. Geef Aidoku toegang tot uw Gallerij om fotos op te slaan. U kunt de toegang aanpassen in de privacy instellingen.";
+"CLEAR_EXCLUDING_LIBRARY" = "Wis Leesgeschiedenis, m.u.v. Bibliotheek";
+"CLEAR_EXCLUDING_LIBRARY_TEXT" = "Deze actie is onomkeerbaar. Alle leesgeschiedenis behalve de bibliotheek zal verwijderd worden.";
+"REMOVING_(ONE)_ITEM_FROM_CATEGORY_%@" = "Boek uit Categorie %@ verwijderen";
+"READER_ORIENTATION" = "Orientatie";
+"FOLLOW_DEVICE" = "Volg Apparaat";
+"MARK_DUPLICATE_CHAPTERS" = "Markeer Dubbele Hoofstukken als Gelezen";
+"OPEN_WEBSITE" = "Open Website";
+"DONE" = "Klaar";
+"INVALID" = "Ongeldig";
+"BASE_URL" = "Basis URL";
+"SEE_ALL" = "Alles bekijken";
+"HOME" = "Home";
+"FILTERS" = "Filters";
+"APPLY" = "Toepassen";
+"SOURCE_SETTINGS" = "Bron instellingen";
+"RESET_SETTINGS_CONFIRM_%@" = "Weet je zeker datje alle instelling voor %@ wilt resetten?";
+"CANCEL_CONFIRM" = "Weet je zeker dat je wilt annuleren?";
+"CANCEL_CONFIRM_TEXT" = "Je aanpassing zullen vervallen.";
+"INVALID_URL" = "Ongeldige URL";
+"INVALID_URL_TEXT" = "De URL is ongeldig voor deze bron.";
+"MORE_BARBUTTON" = "Meer";
+"RETRY" = "Opnieuw";
+"NO_RESULT" = "Geen resultaat";
+"UNIMPLEMENTED" = "Niet geïmplementeerd";
+"NETWORK_ERROR" = "Netwerk fout";
+"DECODING_ERROR" = "Decodeer fout";
+"UNKNOWN_ERROR" = "Onbekende fout";
+"ADD_SOURCE" = "Bron toevoegen";
+"IMPORT_SOURCE" = "Bron importeren";
+"BUILT_IN_SOURCES" = "Ingebouwde bronnen";
+"EXTERNAL_SOURCES" = "Externe bronnen";
+"NO_RESULTS" = "Geen resultaten";
+"NO_EXTERNAL_SOURCES" = "Geen externe bronnen";
+"BROWSE_NO_SOURCES_TEXT_NEW" = "Voeg een bron toe via de plus knop.";
+"VIEW_SERIES" = "Bekijk Series";

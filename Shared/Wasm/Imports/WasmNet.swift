@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import WasmInterpreter
 import SwiftSoup
 import WebKit
 
@@ -16,6 +15,24 @@ enum HttpMethod: Int {
     case HEAD = 2
     case PUT = 3
     case DELETE = 4
+    case PATCH = 5
+    case OPTIONS = 6
+    case CONNECT = 7
+    case TRACE = 8
+
+    var stringValue: String {
+        switch self {
+            case .GET: "GET"
+            case .POST: "POST"
+            case .PUT: "PUT"
+            case .HEAD: "HEAD"
+            case .DELETE: "DELETE"
+            case .PATCH: "PATCH"
+            case .OPTIONS: "OPTIONS"
+            case .CONNECT: "CONNECT"
+            case .TRACE: "TRACE"
+        }
+    }
 }
 
 class WasmResponseObject: KVCObject {
@@ -80,33 +97,30 @@ class WasmNet: WasmImports {
 
     var storedResponse: WasmResponseObject?
 
-    // macOS 10.15 firefox user agent
-    static let defaultUserAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:107.0) Gecko/20100101 Firefox/107.0"
-
     init(globalStore: WasmGlobalStore) {
         self.globalStore = globalStore
     }
 
     func export(into namespace: String = "net") {
-        try? globalStore.vm.addImportHandler(named: "init", namespace: namespace, block: self.init_request)
-        try? globalStore.vm.addImportHandler(named: "send", namespace: namespace, block: self.send)
-        try? globalStore.vm.addImportHandler(named: "close", namespace: namespace, block: self.close)
+        try? globalStore.vm.linkFunction(name: "init", namespace: namespace, function: self.init_request)
+        try? globalStore.vm.linkFunction(name: "send", namespace: namespace, function: self.send)
+        try? globalStore.vm.linkFunction(name: "close", namespace: namespace, function: self.close)
 
-        try? globalStore.vm.addImportHandler(named: "set_url", namespace: namespace, block: self.set_url)
-        try? globalStore.vm.addImportHandler(named: "set_header", namespace: namespace, block: self.set_header)
-        try? globalStore.vm.addImportHandler(named: "set_body", namespace: namespace, block: self.set_body)
+        try? globalStore.vm.linkFunction(name: "set_url", namespace: namespace, function: self.set_url)
+        try? globalStore.vm.linkFunction(name: "set_header", namespace: namespace, function: self.set_header)
+        try? globalStore.vm.linkFunction(name: "set_body", namespace: namespace, function: self.set_body)
 
-        try? globalStore.vm.addImportHandler(named: "get_url", namespace: namespace, block: self.get_url)
-        try? globalStore.vm.addImportHandler(named: "get_data_size", namespace: namespace, block: self.get_data_size)
-        try? globalStore.vm.addImportHandler(named: "get_data", namespace: namespace, block: self.get_data)
-        try? globalStore.vm.addImportHandler(named: "get_header", namespace: namespace, block: self.get_header)
-        try? globalStore.vm.addImportHandler(named: "get_status_code", namespace: namespace, block: self.get_status_code)
+        try? globalStore.vm.linkFunction(name: "get_url", namespace: namespace, function: self.get_url)
+        try? globalStore.vm.linkFunction(name: "get_data_size", namespace: namespace, function: self.get_data_size)
+        try? globalStore.vm.linkFunction(name: "get_data", namespace: namespace, function: self.get_data)
+        try? globalStore.vm.linkFunction(name: "get_header", namespace: namespace, function: self.get_header)
+        try? globalStore.vm.linkFunction(name: "get_status_code", namespace: namespace, function: self.get_status_code)
 
-        try? globalStore.vm.addImportHandler(named: "json", namespace: namespace, block: self.json)
-        try? globalStore.vm.addImportHandler(named: "html", namespace: namespace, block: self.html)
+        try? globalStore.vm.linkFunction(name: "json", namespace: namespace, function: self.json)
+        try? globalStore.vm.linkFunction(name: "html", namespace: namespace, function: self.html)
 
-        try? globalStore.vm.addImportHandler(named: "set_rate_limit", namespace: namespace, block: self.set_rate_limit)
-        try? globalStore.vm.addImportHandler(named: "set_rate_limit_period", namespace: namespace, block: self.set_rate_limit_period)
+        try? globalStore.vm.linkFunction(name: "set_rate_limit", namespace: namespace, function: self.set_rate_limit)
+        try? globalStore.vm.linkFunction(name: "set_rate_limit_period", namespace: namespace, function: self.set_rate_limit_period)
     }
 }
 
@@ -118,7 +132,10 @@ extension WasmNet {
 
         // ensure a user-agent is passed
         if request.value(forHTTPHeaderField: "User-Agent") == nil {
-            request.setValue(Self.defaultUserAgent, forHTTPHeaderField: "User-Agent")
+            request.setValue(
+                UserAgentProvider.shared.getUserAgentBlocking(),
+                forHTTPHeaderField: "User-Agent"
+            )
         }
 
         // add stored cookies
@@ -169,9 +186,10 @@ extension WasmNet {
     }
 
     func isRateLimited() -> Bool {
-        self.rateLimit > 0
-            && -(self.lastRequestTime?.timeIntervalSinceNow ?? -self.period) < self.period
-            && self.passedRequests >= self.rateLimit
+//        self.rateLimit > 0
+//            && -(self.lastRequestTime?.timeIntervalSinceNow ?? -self.period) < self.period
+//            && self.passedRequests >= self.rateLimit
+        false
     }
 
     func incrementRequest() {
@@ -241,7 +259,7 @@ extension WasmNet {
             guard let request = self.globalStore.requests[descriptor] else { return }
             let url: URL?
             // iOS 17 encodes by default the url string causing double encoded characters
-            if #available(iOS 17.0, *) {
+            if #available(iOS 17.0, macOS 14.0, *) {
                 // it seems if we pass a valid RFC 3986 url string to URL() it behaves the same as on iOS 16
                 let urlEncoded = request.URL?
                     .removingPercentEncoding?
@@ -261,14 +279,8 @@ extension WasmNet {
 
             // set body
             if let body = request.body { urlRequest.httpBody = body }
-            switch request.method {
-            case .GET: urlRequest.httpMethod = "GET"
-            case .POST: urlRequest.httpMethod = "POST"
-            case .HEAD: urlRequest.httpMethod = "HEAD"
-            case .PUT: urlRequest.httpMethod = "PUT"
-            case .DELETE: urlRequest.httpMethod = "DELETE"
-            default: break
-            }
+
+            urlRequest.httpMethod = request.method?.stringValue
 
             let response = self.performRequest(urlRequest, cloudflare: true)
             self.globalStore.requests[descriptor]?.response = response

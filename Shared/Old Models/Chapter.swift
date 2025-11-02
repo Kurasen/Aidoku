@@ -6,8 +6,9 @@
 //
 
 import Foundation
+import AidokuRunner
 
-class Chapter: Identifiable {
+class Chapter: Codable, Identifiable {
 
     let sourceId: String
     let id: String
@@ -19,6 +20,8 @@ class Chapter: Identifiable {
     var chapterNum: Float?
     var volumeNum: Float?
     var dateUploaded: Date?
+    var thumbnail: String?
+    var locked: Bool = false
     var sourceOrder: Int
 
     init(
@@ -32,6 +35,8 @@ class Chapter: Identifiable {
         chapterNum: Float? = nil,
         volumeNum: Float? = nil,
         dateUploaded: Date? = nil,
+        thumbnail: String? = nil,
+        locked: Bool = false,
         sourceOrder: Int
     ) {
         self.sourceId = sourceId
@@ -44,6 +49,8 @@ class Chapter: Identifiable {
         self.chapterNum = chapterNum
         self.volumeNum = volumeNum
         self.dateUploaded = dateUploaded
+        self.thumbnail = thumbnail
+        self.locked = locked
         self.sourceOrder = sourceOrder
     }
 }
@@ -77,6 +84,21 @@ extension Chapter: Equatable {
 }
 
 extension Chapter {
+    func toNew() -> AidokuRunner.Chapter {
+        AidokuRunner.Chapter(
+            key: id,
+            title: title,
+            chapterNumber: chapterNum,
+            volumeNumber: volumeNum,
+            dateUploaded: dateUploaded,
+            scanlators: scanlator?.components(separatedBy: ", "),
+            url: url.flatMap({ URL(string: $0) }),
+            language: lang,
+            thumbnail: thumbnail,
+            locked: locked
+        )
+    }
+
     /// Returns a formatted title for this chapter.
     /// `Vol.X Ch.X - Title`
     func makeTitle() -> String {

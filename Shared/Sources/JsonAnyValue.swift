@@ -15,36 +15,35 @@ enum JsonAnyType: Int {
     case array = 5
     case object = 6
     case double = 7
+    case intArray = 8
 }
 
-struct JsonAnyValue: Codable {
+struct JsonAnyValue: Hashable {
     let type: JsonAnyType
 
-    let boolValue: Bool?
-    let intValue: Int?
-    let doubleValue: Double?
-    let stringValue: String?
-    let stringArrayValue: [String]?
-    let objectValue: [String: JsonAnyValue]?
+    var boolValue: Bool?
+    var intValue: Int?
+    var doubleValue: Double?
+    var stringValue: String?
+    var intArrayValue: [Int]?
+    var stringArrayValue: [String]?
+    var objectValue: [String: JsonAnyValue]?
 
-    init(
-        type: JsonAnyType,
-        boolValue: Bool? = nil,
-        intValue: Int? = nil,
-        doubleValue: Double? = nil,
-        stringValue: String? = nil,
-        stringArrayValue: [String]? = nil,
-        objectValue: [String: JsonAnyValue]? = nil
-    ) {
-        self.type = type
-        self.boolValue = boolValue
-        self.intValue = intValue
-        self.doubleValue = doubleValue
-        self.stringValue = stringValue
-        self.stringArrayValue = stringArrayValue
-        self.objectValue = objectValue
+    func toRaw() -> Any? {
+        switch type {
+        case .null: return nil
+        case .int: return intValue
+        case .string: return stringValue
+        case .bool: return boolValue
+        case .array: return stringArrayValue
+        case .object: return objectValue?.mapValues { $0.toRaw() }
+        case .double: return doubleValue
+        case .intArray: return intArrayValue
+        }
     }
+}
 
+extension JsonAnyValue: Codable {
     init(from decoder: Decoder) throws {
         let container =  try decoder.singleValueContainer()
 
@@ -54,6 +53,7 @@ struct JsonAnyValue: Codable {
             intValue = nil
             doubleValue = nil
             stringValue = nil
+            intArrayValue = nil
             stringArrayValue = nil
             objectValue = nil
         } else if let int = try? container.decode(Int.self) {
@@ -62,6 +62,7 @@ struct JsonAnyValue: Codable {
             intValue = int
             doubleValue = Double(int)
             stringValue = nil
+            intArrayValue = nil
             stringArrayValue = nil
             objectValue = nil
         } else if let float = try? container.decode(Float.self) {
@@ -70,6 +71,7 @@ struct JsonAnyValue: Codable {
             intValue = Int(float)
             doubleValue = Double(float)
             stringValue = nil
+            intArrayValue = nil
             stringArrayValue = nil
             objectValue = nil
         } else if let double = try? container.decode(Double.self) {
@@ -78,6 +80,7 @@ struct JsonAnyValue: Codable {
             intValue = Int(double)
             doubleValue = double
             stringValue = nil
+            intArrayValue = nil
             stringArrayValue = nil
             objectValue = nil
         } else if let string = try? container.decode(String.self) {
@@ -86,6 +89,16 @@ struct JsonAnyValue: Codable {
             intValue = nil
             doubleValue = nil
             stringValue = string
+            intArrayValue = nil
+            stringArrayValue = nil
+            objectValue = nil
+        } else if let ints = try? container.decode([Int].self) {
+            type = .array
+            boolValue = nil
+            intValue = nil
+            doubleValue = nil
+            stringValue = nil
+            intArrayValue = ints
             stringArrayValue = nil
             objectValue = nil
         } else if let strings = try? container.decode([String].self) {
@@ -94,6 +107,7 @@ struct JsonAnyValue: Codable {
             intValue = nil
             doubleValue = nil
             stringValue = nil
+            intArrayValue = nil
             stringArrayValue = strings
             objectValue = nil
         } else if let object = try? container.decode([String: JsonAnyValue].self) {
@@ -102,6 +116,7 @@ struct JsonAnyValue: Codable {
             intValue = nil
             doubleValue = nil
             stringValue = nil
+            intArrayValue = nil
             stringArrayValue = nil
             objectValue = object
         } else {
@@ -110,6 +125,7 @@ struct JsonAnyValue: Codable {
             intValue = nil
             doubleValue = nil
             stringValue = nil
+            intArrayValue = nil
             stringArrayValue = nil
             objectValue = nil
         }
@@ -125,18 +141,41 @@ struct JsonAnyValue: Codable {
         case .array: try container.encode(stringArrayValue)
         case .object: try container.encode(objectValue)
         case .double: try container.encode(doubleValue)
+        case .intArray: try container.encode(intArrayValue)
         }
     }
+}
 
-    func toRaw() -> Any? {
-        switch type {
-        case .null: return nil
-        case .int: return intValue
-        case .string: return stringValue
-        case .bool: return boolValue
-        case .array: return stringArrayValue
-        case .object: return objectValue?.mapValues { $0.toRaw() }
-        case .double: return doubleValue
-        }
+extension JsonAnyValue {
+    static func null() -> JsonAnyValue {
+        .init(type: .null)
+    }
+
+    static func string(_ value: String) -> JsonAnyValue {
+        .init(type: .string, stringValue: value)
+    }
+
+    static func int(_ value: Int) -> JsonAnyValue {
+        .init(type: .int, intValue: value, doubleValue: Double(value))
+    }
+
+    static func double(_ value: Double) -> JsonAnyValue {
+        .init(type: .double, intValue: Int(value), doubleValue: value)
+    }
+
+    static func bool(_ value: Bool) -> JsonAnyValue {
+        .init(type: .bool, boolValue: value)
+    }
+
+    static func array(_ value: [String]) -> JsonAnyValue {
+        .init(type: .array, stringArrayValue: value)
+    }
+
+    static func intArray(_ value: [Int]) -> JsonAnyValue {
+        .init(type: .intArray, intArrayValue: value)
+    }
+
+    static func object(_ value: [String: JsonAnyValue]) -> JsonAnyValue {
+        .init(type: .object, objectValue: value)
     }
 }

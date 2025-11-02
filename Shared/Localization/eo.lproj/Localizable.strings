@@ -88,8 +88,6 @@
 "GITHUB_REPO" = "GitHub-deponejo";
 "DISCORD_SERVER" = "Discord-servilo";
 "INCOGNITO_MODE" = "Privata reĝimo";
-"MANGA_PAGE" = "Komiksa paĝo";
-"SHOW_SOURCE_LABEL" = "Montri fontan etikedon";
 "LANDSCAPE" = "Horizontala formato";
 "PORTRAIT" = "Vertikala formato";
 "READER" = "Legilo";
@@ -102,8 +100,7 @@
 "LOG_SERVER" = "Protokolservilo";
 "EXPORT_LOGS" = "Elporti protokolojn";
 "DISPLAY_LOGS" = "Montri protokolojn";
-"CLEAR_CHAPTER_CACHE" = "Forviŝi kaŝmemoron de ĉapitroj";
-"BACKUP_IMPORT_FAIL" = "Enporto malsukcesis";
+"IMPORT_FAIL" = "Enporto malsukcesis";
 "RENAME" = "Ŝanĝi nomon";
 "TITLE" = "Titolo";
 "LIBRARY_LOCKED" = "Biblioteko estas ŝlosita.";

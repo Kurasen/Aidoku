@@ -126,8 +126,6 @@
 "SUPPPORT_DEVELOPMENT" = "Geliştirmeyi Destekle";
 "CHAPTER_X" = "Bölüm %g";
 "RENAME_BACKUP_TEXT" = "Yedek için yeni bir isim gir";
-"MANGA_PAGE" = "Manga Sayfası";
-"SHOW_NSFW_SOURCES" = "İş İçin Uygun Olmayan Kaynakları Göster";
 "SOURCE_LIST_ADD" = "Kaynak Listesi Ekle";
 "LIBRARY_ADD_FROM_BROWSE" = "Gözatma kısmından manga ekle";
 "MANGA_INFO" = "Manga hakkında bilgi";
@@ -162,9 +160,6 @@
 "APPEARANCE_LIGHT" = "Açık";
 "APPEARANCE_DARK" = "Kapalı";
 "USE_SYSTEM_APPEARANCE" = "Sistem Görünüşünü Kullan";
-"SHOW_SOURCE_LABEL" = "Kaynak Etiketini Göster";
-"USE_MANGA_TINT" = "Manga Tonunu Kullan";
-"USE_MANGA_TINT_INFO" = "Manga sayfalarını kapak resminin rengine göre tonla";
 "MANGA_PER_ROW" = "Sıra başı manga";
 "PORTRAIT" = "Portre";
 "LANDSCAPE" = "Yatay";
@@ -197,7 +192,6 @@
 "SOURCE_LIST_ADD_FAIL_TEXT" = "Belirtilen kaynak listesi URL'si geçersiz veya zaten eklenmiş.";
 "LOCK_HISTORY_TAB" = "Geçmiş Sayfasını Kilitle";
 "DOWNSAMPLE_IMAGES" = "Resimleri Küçült";
-"SAVE_IMAGE_OPTION" = "Resim Seçeneğini Kaydet";
 "BACKUPS" = "Yedekler";
 "BACKUP_NAME" = "Yedek İsmi";
 "RENAME_BACKUP" = "Yedeği Yeniden Adlandır";
@@ -210,7 +204,7 @@
 "RESTORE_BACKUP_TEXT" = "Bütün veri silinecek ve bu yedekdeki veri ile değiştirilecek.";
 "BACKUP_IMPORT_SUCCESS" = "Yedek İçe Aktarıldı";
 "BACKUP_IMPORT_SUCCESS_TEXT" = "Bu yedeği geri yüklemek için, yedeği ayarlarda yedek sayfasında bul.";
-"BACKUP_IMPORT_FAIL" = "İçe Aktarma Başarısız Oldu";
+"IMPORT_FAIL" = "İçe Aktarma Başarısız Oldu";
 "BACKUP_IMPORT_FAIL_TEXT" = "Yedek Kaydedilemedi. Lütfen yedeğinizin doğru biçimde olduğundan emin olun.";
 "EXPORT" = "Dışa Aktar";
 "RESTORE" = "Geri Yükle";
@@ -221,10 +215,6 @@
 "EXPORT_LOGS" = "Sistem Günlüklerini Dışa Aktar";
 "ADVANCED" = "Gelişmiş";
 "RESET_TEXT" = "Bu aksiyon geri döndürülemez. Bütün veri, ayarlar ve önbellek silinecek ve resetlenecek.";
-"CLEAR_CHAPTER_CACHE" = "Bölüm Önbelleğini Temizle";
-"CLEAR_CHAPTER_CACHE_TEXT" = "Bu aksiyon geri döndürülemez. Önbelleklenen bölümler silinecek ve yeniden indirilecek.";
-"CLEAR_MANGA_CACHE" = "Manga Önbelleğini Temizle";
-"CLEAR_MANGA_CACHE_TEXT" = "Bu aksiyon geri döndürülemez. Kütüphanenizde olmayan önbelleklenmiş mangalar silinecek.";
 "CLEAR_NETWORK_CACHE" = "Ağ Önbelleğini Temizle";
 "CLEAR_NETWORK_CACHE_TEXT" = "Bu aksiyon geri döndürülemez. Önbelleklenmiş ağ istekleri ve resimler silinecek.";
 "CLEAR_READ_HISTORY" = "Okuma Geçmişini Temizle";
@@ -258,11 +248,11 @@
 "STARTED" = "Başladı";
 "START_TRACKING" = "İzlemeyi Başlat";
 "SCORE" = "Skor";
-"PAUSED" = "Durduruldu";
+"TRACK_PAUSED" = "Durduruldu";
 "FINISHED" = "Bitirildi";
-"READING" = "Okunuyor";
-"PLANNING" = "Planlanmış";
-"DROPPED" = "Bırakıldı";
+"TRACK_READING" = "Okunuyor";
+"TRACK_PLANNING" = "Planlanmış";
+"TRACK_DROPPED" = "Bırakıldı";
 "STOP_TRACKING" = "İzlemeyi Bırak";
 "ONESHOT" = "Tekli";
 "NOT_PUBLISHED" = "Yayınlanmamış";
@@ -279,7 +269,7 @@
 "LOCKED_CATEGORIES" = "Kilitli Kategoriler";
 "LOGOUT" = "Çıkış Yap";
 "AUTH_FOR_LIBRARY" = "Kütüphaneyi görüntülemek için kimliğinizi doğrulayın.";
-"REREADING" = "Tekrar Okunuyor";
+"TRACK_REREADING" = "Tekrar Okunuyor";
 "CLEAR_TRACKED_MANGA" = "İzlenen Mangaları Sil";
 "CLEAR_TRACKED_MANGA_TEXT" = "Bu aksiyon geri döndürülemez. İzleyici eklenmiş bütün mangalar için izleme silinecek.";
 "SUPPORT_VIA_KOFI" = "Ko-Fi İle Destek Ol";
@@ -302,8 +292,6 @@
 "1_CHAPTER" = "1 Bölüm";
 "UPCOMING" = "Yaklaşan";
 "RENAME_CATEGORY_FAIL_INFO" = "Kategori adları benzersiz olmalı.";
-"SYNC_WITH_TRACKER" = "İzleyicilerle Senkronize Et";
-"SYNC_WITH_TRACKER_INFO" = "İzleyicideki son bölüm senin (%g) okuduğun son bölümden daha yüksek. Yerel geçmişini aynı olması için güncellemek ister misin?";
 "ADD_TO_CATEGORY" = "Kategoriye Ekle";
 "RENAME_CATEGORY_INFO" = "Bu kategori için yeni bir isim gir.";
 "MIGRATE" = "Taşı";
@@ -324,13 +312,11 @@
 "UPLOAD_DATE" = "Yükleme Zamanı";
 "ALL_CHAPTERS_READ" = "Bütün Bölümleri Oku";
 "DEFAULT_READING_MODE" = "Varsayılan Okuma Modu";
-"TRACKING" = "Takip Ediliyor";
+"IS_TRACKING" = "Takip Ediliyor";
 "PILLARBOX" = "Çerçeve";
 "PILLARBOX_AMOUNT" = "Çerçeve Boyutu";
 "PILLARBOX_ORIENTATION" = "Çerçeve Yönü";
 "BOTH" = "İkisi de";
-"ANILIST_LOGIN_NEEDED" = "AniList Girişi Gerekli";
-"ANILIST_LOGIN_NEEDED_TEXT" = "AniList Tokeninizin süresi doldu, bu nedenle ayarlardan yeniden oturum açana kadar AniList çalışmayacaktır.";
 "CROP_BORDERS" = "Kenarları Kırp";
 "PILLARBOX_ORIENTATION_INFO" = "Pillarbox Oryantasyonu, pillarboxing'in hangi oryantasyonlar için etkinleştirilmesi gerektiğini belirler.";
 "COPY" = "Kopyala";
@@ -338,8 +324,6 @@
 "UNPIN" = "Başa Tutturmayı Kaldır";
 "REORDER" = "Yeniden sırala";
 "COVER" = "Kapak";
-"MAL_LOGIN_NEEDED" = "MyAnimeList Girişi Gerekiyor";
-"MAL_LOGIN_NEEDED_TEXT" = "MyAnimeList Tokeninizin süresi doldu, bu nedenle ayarlardan yeniden oturum açana kadar MyAnimeList çalışmayacaktır.";
 "BACKUP_ERROR_TEXT" = "%@ Geri yüklerken bir hata oluştu. Yedek geçersiz olabilir.";
 "BACKUP_ERROR" = "Yedek Geri Yükleme Hatası";
 
@@ -362,3 +346,5 @@
 "LINK_COPIED" = "Bağlantı Kopyalandı";
 "SKIPPING_CHAPTERS" = "%i bölümleri atlanıyor, ya kaynakta eksikler var ya da filtrelenmişler";
 "DELETE_DOWNLOAD_AFTER_READING" = "Okuduktan Sonra İndirmeyi Sil";
+"SCANLATOR" = "Tarayıcı";
+"NO_SCANLATOR" = "Tarayıcı yok";

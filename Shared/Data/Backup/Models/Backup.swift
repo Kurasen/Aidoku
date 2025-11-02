@@ -7,7 +7,9 @@
 
 import Foundation
 
-struct Backup: Codable {
+struct Backup: Codable, Hashable, Identifiable {
+    var id: Int { hashValue }
+
     var library: [BackupLibraryManga]?
     var history: [BackupHistory]?
     var manga: [BackupManga]?
@@ -15,6 +17,8 @@ struct Backup: Codable {
     var trackItems: [BackupTrackItem]?
     var categories: [String]?
     var sources: [String]?
+    var sourceLists: [String]?
+    var settings: [String: JsonAnyValue]?
     var date: Date
     var name: String?
     var version: String?

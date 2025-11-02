@@ -37,8 +37,6 @@
 "INCOGNITO_MODE_TEXT" = "Паузира читање историје када је омогућено";
 "APPEARANCE" = "Изглед";
 "USE_SYSTEM_APPEARANCE" = "Користи системски изглед";
-"MANGA_PAGE" = "Страница манге";
-"SHOW_SOURCE_LABEL" = "Прикажи ознаку извора";
 "READER" = "Читач";
 "MANGA_PER_ROW" = "Манга по реду";
 "PIN_MANGA_TYPE" = "Закачи тип";
@@ -62,7 +60,6 @@
 "SOURCE_LIST_ADD_FAIL_TEXT" = "Дати URL листе извора је неважећи или је већ додат.";
 "SOURCE_LIST_ADD_TEXT" = "Унесите URL листе извора";
 "RENAME_BACKUP_TEXT" = "Унесите ново име за вашу резервну копију";
-"SAVE_IMAGE_OPTION" = "Опција за чување слике";
 "BACKUPS" = "Резервне копије";
 "BACKUP_NAME" = "Назив резервне копије";
 "RENAME_BACKUP" = "Преименуј резервну копију";
@@ -72,9 +69,6 @@
 "RESTORE" = "Врати";
 "LOGS" = "Логови";
 "EXPORT_LOGS" = "Извези логове";
-"CLEAR_CHAPTER_CACHE_TEXT" = "Ова акција је неповратна. Кеширана поглавља ће бити очишћена и поново преузета.";
-"CLEAR_MANGA_CACHE" = "Очисти кеш манге";
-"CLEAR_MANGA_CACHE_TEXT" = "Ова акција је неповратна. Кеширана манга која није у вашој библиотеци ће бити уклоњена.";
 "CLEAR_NETWORK_CACHE" = "Очисти кеш мреже";
 "CLEAR_NETWORK_CACHE_TEXT" = "Ова акција је неповратна. Кеширани мрежни захтеви и слике ће бити очишћени.";
 "CLEAR_READ_HISTORY" = "Очисти историју читања";
@@ -100,13 +94,13 @@
 "STATUS" = "Статус";
 "VOLUMES" = "Томови";
 "STARTED" = "Почето";
-"REREADING" = "Поновно читање";
+"TRACK_REREADING" = "Поновно читање";
 "START_TRACKING" = "Почни праћење";
 "SCORE" = "Оцена";
 "FINISHED" = "Готово";
-"READING" = "Читање";
-"PLANNING" = "Планирање";
-"DROPPED" = "Одбачено";
+"TRACK_READING" = "Читање";
+"TRACK_PLANNING" = "Планирање";
+"TRACK_DROPPED" = "Одбачено";
 "MANGA" = "Манга";
 "MANHWA" = "Манхва";
 "MANHUA" = "Манхуа";
@@ -136,7 +130,6 @@
 "ADD_TO_CATEGORIES" = "Додај у категорије";
 "RENAME_CATEGORY_INFO" = "Унесите ново име за ову категорију.";
 "CATEGORY_NAME" = "Име категорије";
-"SYNC_WITH_TRACKER" = "Синхронизуј са трекером";
 "MIGRATE_SOURCES" = "Мигрирај изворе";
 "START_MATCHING" = "Почни упаривање";
 "OPTIONS" = "Опције";
@@ -150,11 +143,7 @@
 "DEFAULT_READING_MODE" = "Подразумевани режим читања";
 "PILLARBOX_AMOUNT" = "Количина пиларбокса";
 "PILLARBOX_ORIENTATION" = "Оријентација пиларбокса";
-"ANILIST_LOGIN_NEEDED" = "Потребна је пријава на AniList";
-"ANILIST_LOGIN_NEEDED_TEXT" = "Ваш AniList токен је истекао, тако да ће AniList трекер престати да ради док се поново не пријавите у подешавањима.";
-"MAL_LOGIN_NEEDED" = "Потребна је пријава на MyAnimeList";
 "BACKUP_ERROR" = "Грешка при враћању резервне копије";
-"MAL_LOGIN_NEEDED_TEXT" = "Ваш MyAnimeList токен је истекао, тако да ће MyAnimeList трекер престати да ради док се поново не пријавите у подешавањима.";
 "READER_BG_COLOR" = "Боја позадине";
 "READER_BG_COLOR_BLACK" = "Црна";
 "BACKUP_INFO" = "Дугим притиском на резервну копију је извозите, или превуците улево да је обришете.";
@@ -180,7 +169,6 @@
 "SKIP_DUPLICATE_CHAPTERS" = "Прескочи дупликатна поглавља";
 "RENAME_CATEGORY" = "Преименуј категорију";
 "RENAME_CATEGORY_FAIL_INFO" = "Имена категорија морају бити јединствена.";
-"SYNC_WITH_TRACKER_INFO" = "Изгледа да је најновије поглавље постављено у трекеру (%g) више од вашег последњег прочитаног поглавља. Да ли желите да ажурирате вашу локалну историју да се поклапа?";
 "BOTH" = "Оба";
 // General
 "CONTINUE" = "Настави";
@@ -301,8 +289,6 @@
 "INCOGNITO_MODE" = "Инкогнито режим";
 "APPEARANCE_LIGHT" = "Светло";
 "APPEARANCE_DARK" = "Тамно";
-"USE_MANGA_TINT" = "Користи тинт манге";
-"USE_MANGA_TINT_INFO" = "Тинтуј странице манге на основу боје слике насловне стране";
 "LANDSCAPE" = "Пејзаж";
 "OPEN_READER_VIEW" = "Отвори приказ читача";
 "ONLY_DOWNLOAD_ON_WIFI" = "Преузимај само на Wi-Fi";
@@ -311,7 +297,6 @@
 "SOURCE_LISTS" = "Листе извора";
 "SOURCE_LIST_ADDED" = "Листа извора додата";
 "SOURCE_LIST_ADDED_TEXT" = "Сада можете прегледати екстерне изворе у табу за преглед.";
-"SHOW_NSFW_SOURCES" = "Прикажи NSFW изворе";
 "SOURCE_LIST_URL" = "URL листе извора";
 "SOURCE_LIST_ADD" = "Додај листу извора";
 "LOCK_HISTORY_TAB" = "Закључај таб историје";
@@ -323,20 +308,19 @@
 "MISSING_SOURCES_TEXT" = "Враћена резервна копија може садржати податке из следећих извора, који тренутно нису инсталирани:";
 "RESTORE_BACKUP_TEXT" = "Сви тренутни подаци ће бити уклоњени и замењени подацима из ове резервне копије.";
 "BACKUP_IMPORT_SUCCESS" = "Резервна копија увезена";
-"BACKUP_IMPORT_FAIL" = "Увоз неуспешан";
+"IMPORT_FAIL" = "Увоз неуспешан";
 "BACKUP_IMPORT_FAIL_TEXT" = "Неуспешно чување резервне копије. Молимо вас да се уверите да је ваша резервна копија у исправном формату.";
 "EXPORT" = "Извези";
 "LOGGING" = "Логовање";
 "LOG_SERVER" = "Лог сервер";
 "DISPLAY_LOGS" = "Прикажи логове";
 "ADVANCED" = "Напредно";
-"CLEAR_CHAPTER_CACHE" = "Очисти кеш поглавља";
 "AUTOMATIC" = "Аутоматски";
 "PAGE_LAYOUT" = "Распоред страница";
 "TRACKERS" = "Трекери";
 "LOGOUT" = "Одјави се";
 "LOGOUT_FROM_%@" = "Одјавити се са %@?";
-"PAUSED" = "Паузирано";
+"TRACK_PAUSED" = "Паузирано";
 "STOP_TRACKING" = "Престани праћење";
 "ONESHOT" = "Једнократни";
 "NOT_PUBLISHED" = "Није објављено";
@@ -351,7 +335,7 @@
 "AVAILABLE" = "Доступно";
 "FIRST_ALTERNATIVE" = "Прва алтернатива";
 "MIGRATE_%i_ITEMS?" = "Мигрирај %i ставки?";
-"TRACKING" = "Праћење";
+"IS_TRACKING" = "Праћење";
 "ALL_CHAPTERS_READ" = "Сва поглавља прочитана";
 "PILLARBOX_ORIENTATION_INFO" = "Оријентација пиларбокса одређује за које оријентације треба омогућити пиларбокс.";
 "BACKUP_ERROR_TEXT" = "Дошло је до грешке приликом враћања: %@. Резервна копија можда није валидна.";
@@ -362,3 +346,5 @@
 "%lld_PLUS_MORE" = "+%lld више";
 "SKIPPING_CHAPTERS" = "Прескакање %i поглавља, или их извор нема или су филтрирана";
 "DELETE_DOWNLOAD_AFTER_READING" = "Izbriši preuzeto nakon čitanja";
+"NO_SCANLATOR" = "Нема скен-преводиоца";
+"SCANLATOR" = "Скен-преводилац";

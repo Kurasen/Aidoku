@@ -59,7 +59,7 @@ class BrowseViewController: BaseTableViewController {
 
         // empty text
         emptyStackView.title = NSLocalizedString("BROWSE_NO_SOURCES", comment: "")
-        emptyStackView.text = NSLocalizedString("BROWSE_NO_SOURCES_TEXT", comment: "")
+        emptyStackView.text = NSLocalizedString("BROWSE_NO_SOURCES_TEXT_NEW", comment: "")
         emptyStackView.buttonText = NSLocalizedString("ADDING_SOURCES_GUIDE_BUTTON", comment: "")
         emptyStackView.addButtonTarget(self, action: #selector(openGuidePage))
         emptyStackView.showsButton = true
@@ -72,6 +72,7 @@ class BrowseViewController: BaseTableViewController {
         updateDataSource()
         Task {
             await viewModel.loadExternalSources()
+            viewModel.loadUpdates()
             updateDataSource()
         }
     }
@@ -92,7 +93,7 @@ class BrowseViewController: BaseTableViewController {
             Task { @MainActor in
                 self.viewModel.loadInstalledSources()
                 self.viewModel.loadPinnedSources()
-                self.viewModel.filterExternalSources()
+                self.viewModel.loadUpdates()
                 if let query = self.navigationItem.searchController?.searchBar.text, !query.isEmpty {
                     self.viewModel.search(query: query)
                 }
@@ -104,22 +105,7 @@ class BrowseViewController: BaseTableViewController {
             guard let self = self else { return }
             Task {
                 await self.viewModel.loadExternalSources()
-                self.updateDataSource()
-            }
-        }
-        // show nsfw sources setting
-        addObserver(forName: "Browse.showNsfwSources") { [weak self] _ in
-            guard let self = self else { return }
-            Task {
-                self.viewModel.filterExternalSources()
-                self.updateDataSource()
-            }
-        }
-        // browse language selection
-        addObserver(forName: "Browse.languages") { [weak self] _ in
-            guard let self = self else { return }
-            Task {
-                self.viewModel.filterExternalSources()
+                self.viewModel.loadUpdates()
                 self.updateDataSource()
             }
         }
@@ -136,10 +122,14 @@ class BrowseViewController: BaseTableViewController {
             Task { @MainActor in
                 self.viewModel.loadInstalledSources()
                 self.viewModel.loadPinnedSources()
-                self.viewModel.filterExternalSources()
                 self.updateDataSource()
             }
         }
+    }
+
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        navigationController?.isToolbarHidden = true
     }
 
     override func viewDidAppear(_ animated: Bool) {
@@ -166,7 +156,8 @@ class BrowseViewController: BaseTableViewController {
 
     @objc func refreshSourceLists(_ refreshControl: UIRefreshControl? = nil) {
         Task {
-            await viewModel.loadExternalSources()
+            await viewModel.loadExternalSources(reload: true)
+            self.viewModel.loadUpdates()
             updateExternalSources()
             refreshControl?.endRefreshing()
         }
@@ -179,13 +170,20 @@ class BrowseViewController: BaseTableViewController {
         present(safariViewController, animated: true)
     }
 
-    @objc func openLanguageSelectPage() {
-        present(UINavigationController(rootViewController: LanguageSelectViewController()), animated: true)
+    @objc func openMigrateSourcePage() {
+        let hostingController = UIHostingController(
+            rootView: SwiftUINavigationView(rootView: MigrateSourcesView())
+        )
+        present(hostingController, animated: true)
     }
 
-    @objc func openMigrateSourcePage() {
-        let migrateView = MigrateSourcesView()
-        present(UIHostingController(rootView: SwiftUINavigationView(rootView: AnyView(migrateView))), animated: true)
+    @objc func openAddSourcePage() {
+        let hostingController = UIHostingController(
+            rootView: AddSourceView(externalSources: viewModel.unfilteredExternalSources)
+                .ignoresSafeArea() // fixes some weird keyboard clipping stuff
+                .environmentObject(NavigationCoordinator(rootViewController: self))
+        )
+        present(hostingController, animated: true)
     }
 
     @objc func stopEditing() {
@@ -212,7 +210,11 @@ extension BrowseViewController {
             let info = dataSource.itemIdentifier(for: indexPath),
             let source = SourceManager.shared.source(for: info.sourceId)
         {
-            let vc = SourceViewController(source: source)
+            let vc: UIViewController = if let legacySource = source.legacySource {
+                SourceViewController(source: legacySource)
+            } else {
+                NewSourceViewController(source: source)
+            }
             navigationController?.pushViewController(vc, animated: true)
         }
         tableView.deselectRow(at: indexPath, animated: true)
@@ -251,18 +253,38 @@ extension BrowseViewController {
             sectionId == .installed || sectionId == .pinned,
             let info = dataSource.itemIdentifier(for: indexPath),
             let source = SourceManager.shared.source(for: info.sourceId)
-        else { return nil }
-
+        else {
+            return nil
+        }
         return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { _ -> UIMenu? in
             var actions: [UIMenuElement] = []
 
             let uninstallAction = UIAction(
                 title: NSLocalizedString("UNINSTALL", comment: ""),
-                image: UIImage(systemName: "trash")
+                image: UIImage(systemName: "trash"),
+                attributes: .destructive
             ) { _ in
-                SourceManager.shared.remove(source: source)
-                self.viewModel.loadInstalledSources()
-                self.updateDataSource()
+                if source.id == LocalSourceRunner.sourceKey {
+                    self.presentAlert(
+                        title: "Remove Local Source?",
+                        message: "This will remove all imported local files.",
+                        actions: [
+                            UIAlertAction(title: NSLocalizedString("CANCEL"), style: .cancel),
+                            UIAlertAction(title: NSLocalizedString("OK"), style: .default) { _ in
+                                Task {
+                                    await LocalFileManager.shared.removeAllLocalFiles()
+                                }
+                                SourceManager.shared.remove(source: source)
+                                self.viewModel.loadInstalledSources()
+                                self.updateDataSource()
+                            }
+                        ]
+                    )
+                } else {
+                    SourceManager.shared.remove(source: source)
+                    self.viewModel.loadInstalledSources()
+                    self.updateDataSource()
+                }
             }
             switch self.sectionIdentifier(for: indexPath.section) {
             // Context menu items for a source in Installed section of the table
@@ -412,10 +434,10 @@ extension BrowseViewController {
             snapshot.appendSections([.installed])
             snapshot.appendItems(viewModel.installedSources, toSection: .installed)
         }
-        if !viewModel.externalSources.isEmpty {
-            snapshot.appendSections([.external])
-            snapshot.appendItems(viewModel.externalSources, toSection: .external)
-        }
+//        if !viewModel.externalSources.isEmpty {
+//            snapshot.appendSections([.external])
+//            snapshot.appendItems(viewModel.externalSources, toSection: .external)
+//        }
 
         dataSource.apply(snapshot)
 
@@ -439,10 +461,10 @@ extension BrowseViewController {
             }
             snapshot.appendItems(viewModel.updatesSources, toSection: .updates)
         }
-        if !viewModel.externalSources.isEmpty {
-            snapshot.appendSections([.external])
-            snapshot.appendItems(viewModel.externalSources, toSection: .external)
-        }
+//        if !viewModel.externalSources.isEmpty {
+//            snapshot.appendSections([.external])
+//            snapshot.appendItems(viewModel.externalSources, toSection: .external)
+//        }
 
         if #available(iOS 15.0, *) {
             // prevents jumpiness from pull to refresh
@@ -485,25 +507,25 @@ extension BrowseViewController {
                 navigationItem.rightBarButtonItems = [UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(stopEditing))]
             }
         } else {
-            let globeImage: UIImage?
-            if #available(iOS 15.0, *) {
-                globeImage = UIImage(systemName: "globe.americas.fill")
-            } else {
-                globeImage = UIImage(systemName: "globe")
-            }
+            let addSourceBarButton = UIBarButtonItem(
+                image: UIImage(systemName: "plus"),
+                style: .plain,
+                target: self,
+                action: #selector(openAddSourcePage)
+            )
+            addSourceBarButton.title = NSLocalizedString("ADD_SOURCE")
+
+            let migrateSourcesBarButton = UIBarButtonItem(
+                image: UIImage(systemName: "arrow.left.arrow.right"),
+                style: .plain,
+                target: self,
+                action: #selector(openMigrateSourcePage)
+            )
+            migrateSourcesBarButton.title = NSLocalizedString("MIGRATE_SOURCES")
+
             navigationItem.rightBarButtonItems = [
-                UIBarButtonItem(
-                    image: globeImage,
-                    style: .plain,
-                    target: self,
-                    action: #selector(openLanguageSelectPage)
-                ),
-                UIBarButtonItem(
-                    image: UIImage(systemName: "arrow.left.arrow.right"),
-                    style: .plain,
-                    target: self,
-                    action: #selector(openMigrateSourcePage)
-                )
+                addSourceBarButton,
+                migrateSourcesBarButton
             ]
         }
     }

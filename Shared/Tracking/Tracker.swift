@@ -5,13 +5,8 @@
 //  Created by Skitty on 6/14/22.
 //
 
+import AidokuRunner
 import Foundation
-
-#if os(OSX)
-    import AppKit
-#else
-    import UIKit
-#endif
 
 /// A protocol for the implementation of a Tracker.
 protocol Tracker: AnyObject {
@@ -20,7 +15,7 @@ protocol Tracker: AnyObject {
     /// The title of the tracker.
     var name: String { get }
     /// The icon of the tracker.
-    var icon: UIImage? { get }
+    var icon: PlatformImage? { get }
     /// An array of track statuses the tracker supports.
     var supportedStatuses: [TrackStatus] { get }
     /// The current score type for the tracker.
@@ -36,8 +31,13 @@ protocol Tracker: AnyObject {
     /// Called when a tracker is linked with a title, indicating that the title should be added to the
     /// user's database on the tracker
     ///
-    /// - Parameter trackId: The identifier for a tracker item.
-    func register(trackId: String, hasReadChapters: Bool) async
+    /// - Returns: The id of tracker item, if it changes.
+    ///
+    /// - Parameters:
+    ///   - trackId: The identifier for a tracker item.
+    ///   - highestChapterRead: The highest chapter number read, if it exists.
+    ///   - earliestReadDate: The earliest date for a read chapter, if it exists.
+    func register(trackId: String, highestChapterRead: Float?, earliestReadDate: Date?) async throws -> String?
 
     /// Update the state of a tracked title.
     ///
@@ -47,7 +47,7 @@ protocol Tracker: AnyObject {
     /// - Parameters:
     ///   - trackId: The identifier for a tracker item.
     ///   - update: The update object with new state values for the tracker item.
-    func update(trackId: String, update: TrackUpdate) async
+    func update(trackId: String, update: TrackUpdate) async throws
 
     /// Get the current state of a tracked title from the tracker.
     ///
@@ -57,7 +57,7 @@ protocol Tracker: AnyObject {
     /// - Returns: The current state of the tracker item.
     ///
     /// - Parameter trackId: The identifier for a tracker item.
-    func getState(trackId: String) async -> TrackState
+    func getState(trackId: String) async throws -> TrackState
 
     /// Get the tracker web URL for a title.
     ///
@@ -74,7 +74,8 @@ protocol Tracker: AnyObject {
     /// - Returns: An array of titles the user can select to register for the manga.
     ///
     /// - Parameter manga: The Manga object to find matches for.
-    func search(for manga: Manga) async -> [TrackSearchItem]
+    /// - Parameter includeNsfw: Whether NSFW search results should be included.
+    func search(for manga: AidokuRunner.Manga, includeNsfw: Bool) async throws -> [TrackSearchItem]
 
     /// Get search results for possible tracker matches for a title string.
     ///
@@ -83,7 +84,8 @@ protocol Tracker: AnyObject {
     /// - Returns: An array of titles the user can select to register for the manga.
     ///
     /// - Parameter title: The title string to search with.
-    func search(title: String) async -> [TrackSearchItem]
+    /// - Parameter includeNsfw: Whether NSFW search results should be included.
+    func search(title: String, includeNsfw: Bool) async throws -> [TrackSearchItem]
 
     /// Log out from the tracker.
     func logout()
@@ -94,6 +96,15 @@ protocol Tracker: AnyObject {
     ///
     /// - Parameter score: The score to match to a corresponding value in scoreOptions.
     func option(for score: Int) -> String?
+
+    /// Check if a given manga can be registered with this tracker.
+    ///
+    /// - Returns: If the manga can be registered.
+    ///
+    /// - Parameters:
+    ///   - sourceKey: The source key for the given manga.
+    ///   - mangaKey: The  key for the given manga.
+    func canRegister(sourceKey: String, mangaKey: String) -> Bool
 }
 
 // Default values for optional properties
@@ -103,11 +114,8 @@ extension Tracker {
     func option(for score: Int) -> String? {
         scoreOptions.first { $0.1 == score }?.0
     }
-}
 
-extension Tracker {
-    /// Check if tracker is currently tracking a manga object.
-    func isTracking(manga: Manga) -> Bool {
-        CoreDataManager.shared.hasTrack(trackerId: id, sourceId: manga.sourceId, mangaId: manga.id)
+    func canRegister(sourceKey: String, mangaKey: String) -> Bool {
+        isLoggedIn
     }
 }

@@ -14,9 +14,34 @@ extension CoreDataManager {
         clear(request: HistoryObject.fetchRequest(), context: context)
     }
 
+    /// Remove all history objects from manga not in library
+    func clearHistoryExcludingLibrary(context: NSManagedObjectContext? = nil) {
+        let context = context ?? self.context
+        let request = HistoryObject.fetchRequest()
+        let libraryMangaIds = self.getLibraryManga(context: context).compactMap {
+            $0.manga?.toManga().id
+        }
+        request.predicate = NSPredicate(
+            format: "NOT (mangaId IN %@)",
+            libraryMangaIds
+        )
+        clear(request: request, context: context)
+    }
+
     /// Gets all history objects.
     func getHistory(context: NSManagedObjectContext? = nil) -> [HistoryObject] {
         (try? (context ?? self.context).fetch(HistoryObject.fetchRequest())) ?? []
+    }
+
+    /// Get history objects for a source.
+    func getHistory(
+        sourceId: String,
+        context: NSManagedObjectContext? = nil
+    ) -> [HistoryObject] {
+        let context = context ?? self.context
+        let request = HistoryObject.fetchRequest()
+        request.predicate = NSPredicate(format: "sourceId == %@", sourceId)
+        return (try? context.fetch(request)) ?? []
     }
 
     /// Get a particular history object.
@@ -87,25 +112,6 @@ extension CoreDataManager {
         }
     }
 
-    /// Removes a HistoryObject in the background.
-    func removeHistory(sourceId: String, mangaId: String, chapterId: String) async {
-        await container.performBackgroundTask { context in
-            do {
-                if let object = self.getHistory(
-                    sourceId: sourceId,
-                    mangaId: mangaId,
-                    chapterId: chapterId,
-                    context: context
-                ) {
-                    context.delete(object)
-                    try context.save()
-                }
-            } catch {
-                LogManager.logger.error("CoreDataManager.removeHistory: \(error.localizedDescription)")
-            }
-        }
-    }
-
     /// Removes history linked to the given chapters
     func removeHistory(chapters: [Chapter]) async {
         await container.performBackgroundTask { context in
@@ -123,6 +129,26 @@ extension CoreDataManager {
                 try context.save()
             } catch {
                 LogManager.logger.error("CoreDataManager.removeHistory(chapters:): \(error.localizedDescription)")
+            }
+        }
+    }
+
+    func removeHistory(sourceId: String, mangaId: String, chapterIds: [String]) async {
+        await container.performBackgroundTask { context in
+            do {
+                for chapterId in chapterIds {
+                    if let object = self.getHistory(
+                        sourceId: sourceId,
+                        mangaId: mangaId,
+                        chapterId: chapterId,
+                        context: context
+                    ) {
+                        context.delete(object)
+                    }
+                }
+                try context.save()
+            } catch {
+                LogManager.logger.error("CoreDataManager.removeHistory(sourceId:mangaId:chapterIds:): \(error.localizedDescription)")
             }
         }
     }
@@ -232,6 +258,8 @@ extension CoreDataManager {
         mangaId: String,
         chapterId: String,
         totalPages: Int? = nil,
+        dateRead: Date? = nil,
+        completed: Bool? = nil,
         context: NSManagedObjectContext? = nil
     ) {
         let historyObject = self.getOrCreateHistory(
@@ -241,44 +269,21 @@ extension CoreDataManager {
             context: context
         )
         historyObject.progress = Int16(progress)
-        historyObject.dateRead = Date()
-        if let totalPages = totalPages {
+        historyObject.dateRead = dateRead ?? Date()
+        if let totalPages {
             historyObject.total = Int16(totalPages)
         }
-    }
-
-    /// Marks chapter as completed.
-    func setCompleted(
-        _ completed: Bool = true,
-        progress: Int? = nil,
-        date: Date = Date(),
-        sourceId: String,
-        mangaId: String,
-        chapterId: String
-    ) async {
-        await container.performBackgroundTask { context in
-            let historyObject = self.getOrCreateHistory(
-                sourceId: sourceId,
-                mangaId: mangaId,
-                chapterId: chapterId,
-                context: context
-            )
-            guard historyObject.completed != completed else { return }
+        if let completed {
             historyObject.completed = completed
-            if let progress = progress {
-                historyObject.progress = Int16(progress)
-            }
-            historyObject.dateRead = date
-            do {
-                try context.save()
-            } catch {
-                LogManager.logger.error("CoreDataManager.setCompleted: \(error.localizedDescription)")
-            }
         }
     }
 
     /// Marks chapters as completed.
-    func setCompleted(chapters: [Chapter], date: Date = Date(), context: NSManagedObjectContext? = nil) {
+    func setCompleted(
+        chapters: [Chapter],
+        date: Date = Date(),
+        context: NSManagedObjectContext? = nil
+    ) {
         for chapter in chapters {
             let historyObject = self.getOrCreateHistory(
                 sourceId: chapter.sourceId,
@@ -292,32 +297,92 @@ extension CoreDataManager {
         }
     }
 
-    /// Marks chapters as completed.
-    func setCompleted(chapters: [Chapter], date: Date = Date()) async {
-        await container.performBackgroundTask { context in
-            self.setCompleted(chapters: chapters, date: date, context: context)
-            do {
-                try context.save()
-            } catch {
-                LogManager.logger.error("CoreDataManager.setCompleted(chapters:): \(error.localizedDescription)")
-            }
-        }
-    }
-
-    /// Check if a chapter has been completely read.
-    func isCompleted(
+    @discardableResult
+    func setCompleted(
         sourceId: String,
         mangaId: String,
-        chapterId: String,
+        chapterIds: [String],
+        date: Date = Date(),
         context: NSManagedObjectContext? = nil
     ) -> Bool {
+        var success = false
+        for chapterId in chapterIds {
+            let historyObject = self.getOrCreateHistory(
+                sourceId: sourceId,
+                mangaId: mangaId,
+                chapterId: chapterId,
+                context: context
+            )
+            guard !historyObject.completed else { continue }
+            historyObject.completed = true
+            historyObject.dateRead = date
+            success = true
+        }
+        return success
+    }
+
+    /// Check if history exists for a manga.
+    func getEarliestReadDate(
+        sourceId: String,
+        mangaId: String,
+        context: NSManagedObjectContext? = nil
+    ) -> Date? {
         let context = context ?? self.context
         let request = HistoryObject.fetchRequest()
         request.predicate = NSPredicate(
-            format: "chapterId == %@ AND mangaId == %@ AND sourceId == %@ AND completed == true",
-            chapterId, mangaId, sourceId
+            format: "mangaId == %@ AND sourceId == %@ AND completed == true",
+            mangaId, sourceId
         )
         request.fetchLimit = 1
-        return (try? context.count(for: request)) ?? 0 > 0
+        request.sortDescriptors = [NSSortDescriptor(key: "dateRead", ascending: true)]
+        let result = (try? context.fetch(request))?.first
+        return result?.dateRead
+    }
+
+    /// Get the highest read number (chapter or volume) based on forced mode for a manga.
+    func getHighestReadNumber(
+        sourceId: String,
+        mangaId: String,
+        context: NSManagedObjectContext? = nil
+    ) -> Float? {
+        let context = context ?? self.context
+        let request = HistoryObject.fetchRequest()
+        request.predicate = NSPredicate(
+            format: "mangaId == %@ AND sourceId == %@ AND completed == true",
+            mangaId, sourceId
+        )
+        request.fetchLimit = 1
+
+        let uniqueKey = "\(sourceId).\(mangaId)"
+        let key = "Manga.chapterDisplayMode.\(uniqueKey)"
+        let displayMode = ChapterTitleDisplayMode(rawValue: UserDefaults.standard.integer(forKey: key)) ?? .default
+
+        switch displayMode {
+            case .default:
+                // Default mode: return highest chapter number
+                request.sortDescriptors = [NSSortDescriptor(key: "chapter.chapter", ascending: false)]
+                let result = (try? context.fetch(request))?.first
+                return result?.chapter?.chapter?.floatValue
+            case .chapter:
+                // Forced chapter mode: return highest chapter number, fallback to volume as chapter
+                request.sortDescriptors = [NSSortDescriptor(key: "chapter.chapter", ascending: false)]
+                let result = (try? context.fetch(request))?.first
+                if let chapter = result?.chapter?.chapter?.floatValue, chapter > 0 {
+                    return chapter
+                } else if let volume = result?.chapter?.volume?.floatValue {
+                    return volume // Use volume number as chapter
+                }
+            case .volume:
+                // Forced volume mode: return highest volume number, fallback to chapter as volume
+                request.sortDescriptors = [NSSortDescriptor(key: "chapter.volume", ascending: false)]
+                let result = (try? context.fetch(request))?.first
+                if let volume = result?.chapter?.volume?.floatValue, volume > 0 {
+                    return volume
+                } else if let chapter = result?.chapter?.chapter?.floatValue {
+                    return chapter // Use chapter number as volume
+                }
+        }
+
+        return nil
     }
 }
